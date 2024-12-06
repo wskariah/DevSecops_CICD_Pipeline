@@ -1,0 +1,208 @@
+pipeline {
+    agent master
+
+    environment {
+        // global variables
+        SONARQUBE = 'SonarQube-irs'  // SonarQube server name in Jenkins
+        ARTIFACTORY_REPO = 'https:///artifactory/api/docker/wilson-docker' // JFrog Artifactory URL
+        IMAGE_NAME = 'hello-world-app' // Your container image name
+        IMAGE_TAG = 'latest' // Image tag
+        CONTAINER_REGISTRY = 'docker.io'  // Docker registry
+        QUALYS_API_KEY = credentials('qualys-api-key') // Qualys API Key from Jenkins credentials
+        SERVICE_NOW_TOKEN = credentials('servicenow-token') // ServiceNow token from Jenkins credentials
+        ECP_DEV_URL = 'https://ecp-dev.excella.com' // ECP Dev URL
+        ECP_PROD_URL = 'https://ecp-prod.excella.com' // ECP Prod URL
+        IEP_DEV_URL = 'https://iep-dev.excella.com' // IEP Dev URL
+        IEP_PROD_URL = 'https://iep-prod.excella.com' // IEP Prod URL
+        SELENIUM_GRID_URL = 'http://selenium-grid.excella.com' // Selenium Grid URL
+        SOAPUI_TEST_URL = 'http://soapui.excella.com' // SoapUI Test URL
+        LOADRUNNER_URL = 'http://loadrunner.excella.com' // LoadRunner URL
+    }
+
+    stages {
+        stage('Build Container Image') {
+            steps {
+                script {
+                    // Build the container image using Podman
+                    sh "podman build -t ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
+            }
+        }
+
+        stage('Jacoco Code Coverage') {
+            steps {
+                script {
+                    // Run tests and generate Jacoco code coverage
+                    sh '''
+                        mvn clean install
+                        mvn test
+                    '''
+                }
+            }
+        }
+
+        stage('Qualys Static Container Security Scan') {
+            steps {
+                script {
+                    // Run Qualys Static Container Security Scan
+                    sh "qualys-container-scan --image ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --api-key ${QUALYS_API_KEY}"
+                }
+            }
+        }
+
+        stage('Push Container Image to Artifactory') {
+            steps {
+                script {
+                    // Push the image to Artifactory using Podman
+                    sh """
+                        podman login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
+                        podman tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                        podman push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+
+        stage('Pull Container Image from Artifactory') {
+            steps {
+                script {
+                    // Pull the image from Artifactory using Podman
+                    sh "podman pull ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Change Management Integration - ServiceNow') {
+            steps {
+                script {
+                    // Integrate with ServiceNow for Change Management
+                    sh '''
+                        curl -X POST -H "Authorization: Bearer ${SERVICE_NOW_TOKEN}" -H "Content-Type: application/json" -d '{"incident": {"short_description": "Deploying to ECP Dev"}}' https://excella.service-now.com/api/now/table/incident
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy to ECP - Dev') {
+            steps {
+                script {
+                    // Deploy to ECP Dev
+                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${ECP_DEV_URL}/deploy"
+                }
+            }
+        }
+
+        stage('ECP Smoke Test - minimal curl') {
+            steps {
+                script {
+                    // Perform minimal smoke test in ECP Dev environment using curl
+                    sh "curl -f ${ECP_DEV_URL}/health-check"
+                }
+            }
+        }
+
+        stage('Deploy to ECP - Test') {
+            steps {
+                script {
+                    // Deploy to ECP Test (SAT, PTE, etc.)
+                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${ECP_DEV_URL}/deploy/test"
+                }
+            }
+        }
+
+        stage('Deploy to ECP - Prod') {
+            steps {
+                script {
+                    // Deploy to ECP Prod
+                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${ECP_PROD_URL}/deploy"
+                }
+            }
+        }
+
+        stage('Deploy to IEP - Dev') {
+            steps {
+                script {
+                    // Deploy to IEP Dev
+                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${IEP_DEV_URL}/deploy"
+                }
+            }
+        }
+
+        stage('IEP Smoke Test - minimal curl') {
+            steps {
+                script {
+                    // Perform minimal smoke test in IEP Dev environment using curl
+                    sh "curl -f ${IEP_DEV_URL}/health-check"
+                }
+            }
+        }
+
+        stage('Deploy to IEP - Test') {
+            steps {
+                script {
+                    // Deploy to IEP Test (SAT, PTE, etc.)
+                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${IEP_DEV_URL}/deploy/test"
+                }
+            }
+        }
+
+        stage('Deploy to IEP - Prod') {
+            steps {
+                script {
+                    // Deploy to IEP Prod
+                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${IEP_PROD_URL}/deploy"
+                }
+            }
+        }
+
+        stage('Selenium Grid for UI Testing') {
+            steps {
+                script {
+                    // Trigger Selenium Grid for UI testing
+                    sh "curl -X POST -d 'test_suite=ui_tests' ${SELENIUM_GRID_URL}/run"
+                }
+            }
+        }
+
+        stage('SoapUI for API Testing') {
+            steps {
+                script {
+                    // Trigger SoapUI for API testing
+                    sh "curl -X POST -d 'test_suite=api_tests' ${SOAPUI_TEST_URL}/run"
+                }
+            }
+        }
+
+        stage('LoadRunner for Performance Testing') {
+            steps {
+                script {
+                    // Trigger LoadRunner for performance testing
+                    sh "curl -X POST -d 'test_suite=load_tests' ${LOADRUNNER_URL}/run"
+                }
+            }
+        }
+
+        stage('Qualys Web Scan for DAST') {
+            steps {
+                script {
+                    // Run Qualys Web Scan for Dynamic Application Security Testing (DAST)
+                    sh "qualys-web-scan --url https://myapp.com --api-key ${QUALYS_API_KEY}"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline finished!'
+        }
+
+        success {
+            echo 'Pipeline successfully completed!'
+        }
+
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
