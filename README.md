@@ -93,7 +93,8 @@ Ensure you have JDK 8 and Maven installed.
 Run the following command to build and run tests:
 
     mvn clean install
-        This will: Compile the code. Run unit tests using JUnit 5.Generate code coverage reports using JaCoCo.
+        
+This will: Compile the code. Run unit tests using JUnit 5.Generate code coverage reports using JaCoCo.
 
 To generate the Jacoco reports:
 
@@ -126,12 +127,12 @@ You can find the pipeline definition in the Jenkinsfile in the root of the repos
 Example Jenkins Pipeline Execution
 The pipeline will perform the following steps:
 
-    Build Container Image using Podman.
-    Run Unit Tests and generate code coverage with JaCoCo.
-    Scan the container image for vulnerabilities using Qualys.
-    Push the image to Artifactory for storage.
-    Deploy to different environments, such as ECP Dev, IEP Dev, ECP Prod, etc.
-    Perform Smoke Tests, UI Tests, API Tests, Performance Tests, and Security Scans.
+Build Container Image using Podman.
+Run Unit Tests and generate code coverage with JaCoCo.
+Scan the container image for vulnerabilities using Qualys.
+Push the image to Artifactory for storage.
+Deploy to different environments, such as ECP Dev, IEP Dev, ECP Prod, etc.
+Perform Smoke Tests, UI Tests, API Tests, Performance Tests, and Security Scans.
 
 
 Configuration
