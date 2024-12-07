@@ -37,4 +37,3 @@ commands:
         component: java-debugger
         args: ["spring-boot:run"]
 
-  # Optionally, you can create a com

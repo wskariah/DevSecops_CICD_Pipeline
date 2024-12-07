@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -13,6 +12,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <jacoco.version>0.8.7</jacoco.version>
     </properties>
 
     <dependencies>
@@ -29,24 +29,25 @@
             <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
-        <!-- Jacoco for code coverage -->
+        <!-- Jacoco Agent for code coverage -->
         <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>org.jacoco.agent</artifactId>
-            <version>0.8.7</version>
+            <version>${jacoco.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Jacoco Plugin for code coverage -->
+            <!-- Jacoco Plugin for Code Coverage -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.7</version>
+                <version>${jacoco.version}</version>
                 <executions>
                     <execution>
+                        <!-- Prepare Jacoco agent for collecting coverage data during tests -->
                         <goals>
                             <goal>prepare-agent</goal>
                             <goal>report</goal>
@@ -54,52 +55,87 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <!-- Specify where to store the Jacoco report -->
+                    <outputDirectory>${project.build.directory}/jacoco-coverage-report</outputDirectory>
+
+                    <!-- Define coverage rules (corrected configuration) -->
+                    <rules>
+                        <!-- Rule for Class Coverage -->
+                        <rule>
+                            <element>CLASS</element>
+                            <limit>
+                                <counter>LINE</counter>
+                                <value>80%</value>  <!-- Minimum line coverage percentage -->
+                            </limit>
+                        </rule>
+
+                        <!-- Rule for Method Coverage -->
+                        <rule>
+                            <element>METHOD</element>
+                            <limit>
+                                <counter>LINE</counter>
+                                <value>70%</value>  <!-- Minimum method coverage percentage -->
+                            </limit>
+                        </rule>
+
+                        <!-- Rule for Instruction Coverage -->
+                        <rule>
+                            <element>INSTRUCTION</element>
+                            <limit>
+                                <counter>LINE</counter>
+                                <value>80%</value>  <!-- Minimum instruction coverage percentage -->
+                            </limit>
+                        </rule>
+                    </rules>
+                </configuration>
             </plugin>
 
-            <!-- Maven Surefire Plugin for running tests -->
+            <!-- Maven Surefire Plugin to run tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M5</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                </configuration>
             </plugin>
 
-            <!-- Docker Maven Plugin (optional, if you want to build Docker images directly from Maven) -->
+            <!-- Plugin to generate HTML reports for Jenkins -->
             <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
-                <version>1.4.13</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.9.1</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>build</goal>
-                            <goal>push</goal>
+                            <goal>site</goal>
                         </goals>
-                        <configuration>
-                            <repository>${docker.registry}/${project.artifactId}</repository>
-                            <tag>${project.version}</tag>
-                            <buildArgs>
-                                <BUILD_DATE>${maven.build.timestamp}</BUILD_DATE>
-                                <JAR_FILE>target/${project.artifactId}-${project.version}.jar</JAR_FILE>
-                            </buildArgs>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 
     <profiles>
-        <!-- Profile for production, enabling Docker build if needed -->
         <profile>
-            <id>docker</id>
+            <id>jacoco-report</id>
             <build>
                 <plugins>
-                    <!-- Docker Maven Plugin configuration for Docker build -->
                     <plugin>
-                        <groupId>com.spotify</groupId>
-                        <artifactId>dockerfile-maven-plugin</artifactId>
-                        <version>1.4.13</version>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
