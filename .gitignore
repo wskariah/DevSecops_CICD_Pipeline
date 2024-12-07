@@ -1,0 +1,57 @@
+# Maven build output
+/target/
+
+# IntelliJ IDEA
+.idea/
+/*.iml
+
+# Eclipse
+/.project
+/.classpath
+/.settings/
+
+# NetBeans
+/nbproject/
+
+# VSCode
+.vscode/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Local environment files
+*.env
+
+# Maven Wrapper
+.mvn/wrapper/
+
+# Java compiler and IDE cache files
+*.class
+*.jar
+*.war
+*.ear
+
+# Spring Boot
+spring-boot-devtools
+
+# IDE-specific files
+# JetBrains IDEs (IntelliJ IDEA, WebStorm, etc.)
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# VS Code user settings (optional)
+.vscode/settings.json
+
+# User-specific files (for example, if you use local dev setup or personal settings)
+*.user
