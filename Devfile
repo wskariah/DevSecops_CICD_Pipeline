@@ -1,39 +1,73 @@
+
+## This Devfile is used to manage the development environment customization. This is used to configure in RedHat OpenShift DevSpace
+## Devfiles included in the registry are specific to Red Hat OpenShift Dev Space
+
+
 apiVersion: 1.0.0
 metadata:
   name: java-devspace
   version: 1.0.0
-  description: "Devfile for Java Application using Maven"
+  description: "Devfile for Java Application using Maven and Spring Boot on OpenShift"
 
 components:
-  # Java container with OpenJDK and Maven preinstalled
-  - name: java-container
+  # Build container: Maven + OpenJDK
+  - name: java-build-container
     container:
-      image: maven:3.8-openjdk-11  # Image with Maven and OpenJDK 11
+      image: maven:3.8-openjdk-11  # Maven with OpenJDK 11
       memoryLimit: 2Gi
-      mountSources: true  # Mount the source code directory to the container
+      cpuLimit: 1  # Set CPU limit for OpenShift
+      cpuRequest: 500m  # Set CPU request for OpenShift
+      mountSources: true  # Mount source code into the container
       mountPath: /projects  # Path inside the container where the code will be mounted
       command:
         - "mvn"
         - "clean"
         - "install"
       args:
-        - "-DskipTests"  # Skip tests by default during build (optional)
+        - "-DskipTests"  # Optional: Skip tests during the build
+      workingDir: /projects
+      # OpenShift will require a non-root user to run containers
+      securityContext:
+        runAsUser: 1001  # OpenShift non-root user (ensure your image supports this)
 
-  # You can add additional components if needed (like a database or other services)
-  - name: java-debugger
+  # Run container: Spring Boot Application + Debugging
+  - name: java-debug-container
     container:
-      image: maven:3.8-openjdk-11
+      image: maven:3.8-openjdk-11  # Maven with OpenJDK 11
       memoryLimit: 2Gi
+      cpuLimit: 1  # Set CPU limit for OpenShift
+      cpuRequest: 500m  # Set CPU request for OpenShift
       mountSources: true
+      mountPath: /projects  # Mount source code into the container
+      ports:
+        - containerPort: 8080  # Expose application port
+        - containerPort: 5005  # Expose the debug port for remote debugging
       command:
         - "mvn"
-        - "spring-boot:run"  # Command to run the Java application in debug mode (for Spring Boot apps)
+        - "spring-boot:run"
+      args:
+        - "-Dspring-boot.run.profiles=dev"  # Optional: Set Spring profile
+      # Add JVM options for remote debugging (useful for IDE debugging)
+      env:
+        - name: JAVA_OPTS
+          value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"  # Remote debug options
+      # Ensure non-root user for OpenShift compatibility
+      securityContext:
+        runAsUser: 1001  # OpenShift non-root user
+
+  # Optional: You can also add a database or other components as needed.
 
 commands:
-  # This is the command to start your Java application (or debugging)
+  # Command to run the build process
+  - name: build-java-app
+    actions:
+      - action: run
+        component: java-build-container
+        args: ["clean", "install", "-DskipTests"]
+
+  # Command to start the Java application
   - name: run-java-app
     actions:
       - action: run
-        component: java-debugger
+        component: java-debug-container
         args: ["spring-boot:run"]
-

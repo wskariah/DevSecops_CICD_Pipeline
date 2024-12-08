@@ -1,3 +1,6 @@
+
+# Using podman to build
+
 FROM jenkins/jenkins:lts
 
 # Install necessary dependencies for Podman
