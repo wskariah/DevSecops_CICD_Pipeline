@@ -1,6 +1,6 @@
 # exemplar-pipeline-ws
 
-tasks for eCI/CD exemplar pipeline v1:
+TASK FOR eCI/CD exemplar pipeline
 
     1. Build container image
     2. Jacoco code coverage
@@ -26,7 +26,7 @@ tasks for eCI/CD exemplar pipeline v1:
 exemplar-pipeline-ws/
 ├── Dockerfile                        # Docker image
 ├── Jenkinsfile                       # Jenkins pipeline definition
-├── devfile.yaml                      # Devfile for containerized development
+├── devfile.yaml                      # Devfile for containerized development in RedHat DevSpace
 ├── pom.xml                           # Maven build file
 └── src/
     └── main/
@@ -51,7 +51,7 @@ exemplar-pipeline-ws/
 
 
 
-Java application with Docker support, unit testing, code coverage, and CI/CD integration using Jenkins, SonarQube, Artifactory, Qualys, and more.
+Java application with Docker support, unit testing, code coverage, and CI/CD integration using Jenkins, SonarQube, Artifactory, Qualys.
 
 Project Overview
 This project demonstrates a simple Java application packaged as a JAR file. It includes:
@@ -79,6 +79,7 @@ Technologies
 
 
 Requirements
+
     JDK 8 or higher
     Maven 3.x
     Podman or Docker installed
@@ -94,10 +95,12 @@ Requirements
         URLs for various environments (ECP, IEP, etc.)
 
 Setup
+
 Clone the Repository
 
-git clone https://github.com/excellaco/exemplar-pipeline-ws.git
-cd exemplar-pipeline-ws
+```git clone https://github.com/excellaco/exemplar-pipeline-ws.git
+
+cd exemplar-pipeline-ws```
 
 
 Maven Build
@@ -112,13 +115,14 @@ This will: Compile the code. Run unit tests using JUnit 5.Generate code coverage
 To generate the Jacoco reports:
 
 
-mvn jacoco:report
+`mvn jacoco:report`
 
 
 CI/CD Pipeline (Jenkins)
 This project is set up with Jenkins for automated CI/CD. The pipeline includes the following stages:
 
 Pipeline Stages
+
     Build Container Image: Builds the Docker image for the application.
     Jacoco Code Coverage: Runs tests and generates code coverage reports.
     Publish Jacoco Report: Archives Jacoco code coverage reports to Jenkins.
@@ -162,7 +166,7 @@ Testing
 Unit Tests
 Unit tests are written using JUnit 5. To run the tests locally, use the following Maven command:
 
-mvn test
+`mvn test`
 
 
 Code Coverage
@@ -177,16 +181,15 @@ The project includes a Dockerfile for containerizing the application. The contai
 Build the Container Image Locally
 You can build the Docker image locally using the following command:
 
-podman build -t hello-world-app:latest .
+`podman build -t hello-world-app:latest`
 
 Run the Container Locally
-To run the container locally:
 
-
-podman run -d -p 8080:8080 hello-world-app:latest
+`podman run -d -p 8080:8080 hello-world-app:latest`
 
 
 Deployment
+
 The application is deployed to multiple environments (Dev, Test, Prod) via the Jenkins pipeline. The pipeline uses curl commands to trigger deployments to ECP and IEP environments.
 
 Conclusion

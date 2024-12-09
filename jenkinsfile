@@ -43,10 +43,10 @@ pipeline {
             steps {
                 script {
                     // Archive Jacoco code coverage reports to Jenkins
-                    junit '**/target/test-classes/test-*.xml' // Ensure you have the correct test report path if different
+                    junit '**/target/test-classes/test-*.xml' // report path
                     publishHTML(target: [
                         reportName: 'Jacoco Code Coverage Report',
-                        reportDir: 'target/site/jacoco',  // Make sure this matches your Jacoco output directory
+                        reportDir: 'target/site/jacoco',  // Jacoco output directory
                         reportFiles: 'index.html'
                     ])
                 }
