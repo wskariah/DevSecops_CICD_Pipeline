@@ -1,6 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -9,13 +11,16 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
+    <!-- Properties -->
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <jacoco.version>0.8.7</jacoco.version>
         <sonar.version>3.9.0.2155</sonar.version> <!-- Latest SonarQube plugin version -->
+        <java.version>1.8</java.version> <!-- Java version for consistency -->
     </properties>
 
+    <!-- Dependencies -->
     <dependencies>
         <!-- JUnit for unit testing -->
         <dependency>
@@ -30,6 +35,7 @@
             <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
+
         <!-- Jacoco Agent for code coverage -->
         <dependency>
             <groupId>org.jacoco</groupId>
@@ -39,6 +45,7 @@
         </dependency>
     </dependencies>
 
+    <!-- Build Configuration -->
     <build>
         <plugins>
             <!-- Jacoco Plugin for Code Coverage -->
@@ -48,7 +55,6 @@
                 <version>${jacoco.version}</version>
                 <executions>
                     <execution>
-                        <!-- Prepare Jacoco agent for collecting coverage data during tests -->
                         <goals>
                             <goal>prepare-agent</goal>
                             <goal>report</goal>
@@ -57,12 +63,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!-- Specify where to store the Jacoco report -->
                     <outputDirectory>${project.build.directory}/jacoco-coverage-report</outputDirectory>
-
-                    <!-- Define coverage rules -->
+                    <!-- Coverage rules -->
                     <rules>
-                        <!-- Rule for Class Coverage -->
+                        <!-- Class coverage rule -->
                         <rule>
                             <element>CLASS</element>
                             <limit>
@@ -71,7 +75,7 @@
                             </limit>
                         </rule>
 
-                        <!-- Rule for Method Coverage -->
+                        <!-- Method coverage rule -->
                         <rule>
                             <element>METHOD</element>
                             <limit>
@@ -80,7 +84,7 @@
                             </limit>
                         </rule>
 
-                        <!-- Rule for Instruction Coverage -->
+                        <!-- Instruction coverage rule -->
                         <rule>
                             <element>INSTRUCTION</element>
                             <limit>
@@ -142,7 +146,9 @@
         </plugins>
     </build>
 
+    <!-- Profiles -->
     <profiles>
+        <!-- Profile for generating Jacoco coverage reports -->
         <profile>
             <id>jacoco-report</id>
             <build>

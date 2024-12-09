@@ -21,7 +21,7 @@ TASK FOR eCI/CD exemplar pipeline
     17. LoadRunner for performance testing
     18. Qualys Web Scan for DAST
 
-
+( I do not have Nexus or most of the requirements.)
 
 exemplar-pipeline-ws/
 ├── Dockerfile                        # Docker image
@@ -116,6 +116,13 @@ To generate the Jacoco reports:
 
 
 `mvn jacoco:report`
+
+
+Maven Wrapper:
+Download the Wrapper: Run the following command in the root of your Maven project to generate the wrapper scripts:
+
+
+mvn -N io.takari:maven:wrapper
 
 
 CI/CD Pipeline (Jenkins)
