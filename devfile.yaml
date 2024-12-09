@@ -1,0 +1,86 @@
+
+## This Devfile is used to manage the development environment customization. This is used to configure in RedHat OpenShift DevSpace
+## Devfiles included in the registry are specific to Red Hat OpenShift Dev Space
+
+
+apiVersion: 1.0.0
+metadata:
+  name: java-devspace
+  version: 1.0.0
+  description: "Devfile using Maven from GitHub repository"
+
+components:
+
+  - name: java-container
+    container:
+      image: maven:3.8-openjdk-11
+      memoryLimit: 2Gi
+      cpuLimit: 1  # CPU limit for OpenShift/Red Hat Dev Spaces
+      cpuRequest: 500m  # CPU request for OpenShift/Red Hat Dev Spaces
+      mountSources: true  # Mount the source code directory into the container
+      mountPath: /projects  # Path inside the container where the code will be mounted
+      command:
+        - "mvn"
+        - "clean"
+        - "install"
+      args:
+        - "-DskipTests"  # Skip tests in the build step
+      workingDir: /projects 
+
+  # second container for running/debugging the application
+  - name: java-debugger
+    container:
+      image: maven:3.8-openjdk-11  # Maven with OpenJDK 11
+      memoryLimit: 2Gi
+      cpuLimit: 1
+      cpuRequest: 500m
+      mountSources: true  # Mount the source code
+      mountPath: /projects
+      ports:
+        - containerPort: 8080  # Port for Spring Boot app or Java server
+        - containerPort: 5005  # Port for remote debugging (useful for IDE)
+      command:
+        - "mvn"
+        - "spring-boot:run"  # command to start your app (Spring Boot here)
+      args:
+        - "-Dspring-boot.run.profiles=dev"  # Set dev profile or any environment-specific properties
+      env:
+        - name: JAVA_OPTS
+          value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"  # Enable debugging
+      workingDir: /projects
+
+# Define commands for build, run, and tests
+commands:
+  # Command to build the application
+  - name: build-java-app
+    actions:
+      - action: run
+        component: java-container
+        args: ["clean", "install", "-DskipTests"] 
+
+  # Command to run the application
+  - name: run-java-app
+    actions:
+      - action: run
+        component: java-debugger
+        args: ["spring-boot:run"]
+
+  # Command to run the tests
+  - name: test-java-app
+    actions:
+      - action: run
+        component: java-container
+        args: ["test"]
+
+# workspace for mounting the GitHub repository
+projects:
+  - name: my-java-project
+    source:
+      git:
+        url: "https://github.com/excellaco/exemplar-pipeline-ws"  #  GitHub repo URL
+        branch: main  # Default branch
+        mountPath: /projects
+
+volumes:
+  - name: workspace-storage
+    mountPath: /projects

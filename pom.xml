@@ -4,8 +4,8 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.example</groupId>
-    <artifactId>hello-world-app</artifactId>
+    <groupId>com.excella</groupId>
+    <artifactId>helloworld-app</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -13,6 +13,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <jacoco.version>0.8.7</jacoco.version>
+        <sonar.version>3.9.0.2155</sonar.version> <!-- Latest SonarQube plugin version -->
     </properties>
 
     <dependencies>
@@ -59,14 +60,14 @@
                     <!-- Specify where to store the Jacoco report -->
                     <outputDirectory>${project.build.directory}/jacoco-coverage-report</outputDirectory>
 
-                    <!-- Define coverage rules (corrected configuration) -->
+                    <!-- Define coverage rules -->
                     <rules>
                         <!-- Rule for Class Coverage -->
                         <rule>
                             <element>CLASS</element>
                             <limit>
                                 <counter>LINE</counter>
-                                <value>80%</value>  <!-- Minimum line coverage percentage -->
+                                <value>80%</value> <!-- Minimum line coverage percentage -->
                             </limit>
                         </rule>
 
@@ -75,7 +76,7 @@
                             <element>METHOD</element>
                             <limit>
                                 <counter>LINE</counter>
-                                <value>70%</value>  <!-- Minimum method coverage percentage -->
+                                <value>70%</value> <!-- Minimum method coverage percentage -->
                             </limit>
                         </rule>
 
@@ -84,7 +85,7 @@
                             <element>INSTRUCTION</element>
                             <limit>
                                 <counter>LINE</counter>
-                                <value>80%</value>  <!-- Minimum instruction coverage percentage -->
+                                <value>80%</value> <!-- Minimum instruction coverage percentage -->
                             </limit>
                         </rule>
                     </rules>
@@ -115,6 +116,28 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- SonarQube Plugin to analyze the project and generate reports -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>sonar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <sonar.projectKey>com.excella:helloworld-app</sonar.projectKey> <!-- Set your project key -->
+                    <sonar.projectName>helloworld-app</sonar.projectName> <!-- Set your project name -->
+                    <sonar.projectVersion>${project.version}</sonar.projectVersion> <!-- Set the project version -->
+                    <sonar.jacoco.reportPaths>${project.build.directory}/jacoco-coverage-report/jacoco.xml</sonar.jacoco.reportPaths>
+                    <!-- Fail the build if the Quality Gate fails -->
+                    <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+                </configuration>
             </plugin>
         </plugins>
     </build>

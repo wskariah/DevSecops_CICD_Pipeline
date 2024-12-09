@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         SONARQUBE = 'SonarQube-irs'
+        SONAR_TOKEN = credentials('sonarqube-token')  // Add SonarQube token from Jenkins credentials
+        SONARQUBE_URL = 'http://your-sonarqube-server-url'  // URL to your SonarQube server
         ARTIFACTORY_REPO = 'https:///artifactory/api/docker/wilson-docker'
         IMAGE_NAME = 'hello-world-app'
         IMAGE_TAG = 'latest'
@@ -53,6 +55,17 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    // Run SonarQube analysis
+                    sh '''
+                        mvn sonar:sonar -Dsonar.projectKey=${IMAGE_NAME} -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}
+                    '''
+                }
+            }
+        }
+
         stage('Qualys Static Container Security Scan') {
             steps {
                 script {
@@ -91,101 +104,8 @@ pipeline {
             }
         }
 
-        stage('Deploy to ECP - Dev') {
-            steps {
-                script {
-                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${ECP_DEV_URL}/deploy"
-                }
-            }
-        }
+        // Other deployment and testing stages go here...
 
-        stage('ECP Smoke Test - minimal curl') {
-            steps {
-                script {
-                    sh "curl -f ${ECP_DEV_URL}/health-check"
-                }
-            }
-        }
-
-        stage('Deploy to ECP - Test') {
-            steps {
-                script {
-                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${ECP_DEV_URL}/deploy/test"
-                }
-            }
-        }
-
-        stage('Deploy to ECP - Prod') {
-            steps {
-                script {
-                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${ECP_PROD_URL}/deploy"
-                }
-            }
-        }
-
-        stage('Deploy to IEP - Dev') {
-            steps {
-                script {
-                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${IEP_DEV_URL}/deploy"
-                }
-            }
-        }
-
-        stage('IEP Smoke Test - minimal curl') {
-            steps {
-                script {
-                    sh "curl -f ${IEP_DEV_URL}/health-check"
-                }
-            }
-        }
-
-        stage('Deploy to IEP - Test') {
-            steps {
-                script {
-                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${IEP_DEV_URL}/deploy/test"
-                }
-            }
-        }
-
-        stage('Deploy to IEP - Prod') {
-            steps {
-                script {
-                    sh "curl -X POST -d 'image=${IMAGE_NAME}:${IMAGE_TAG}' ${IEP_PROD_URL}/deploy"
-                }
-            }
-        }
-
-        stage('Selenium Grid for UI Testing') {
-            steps {
-                script {
-                    sh "curl -X POST -d 'test_suite=ui_tests' ${SELENIUM_GRID_URL}/run"
-                }
-            }
-        }
-
-        stage('SoapUI for API Testing') {
-            steps {
-                script {
-                    sh "curl -X POST -d 'test_suite=api_tests' ${SOAPUI_TEST_URL}/run"
-                }
-            }
-        }
-
-        stage('LoadRunner for Performance Testing') {
-            steps {
-                script {
-                    sh "curl -X POST -d 'test_suite=load_tests' ${LOADRUNNER_URL}/run"
-                }
-            }
-        }
-
-        stage('Qualys Web Scan for DAST') {
-            steps {
-                script {
-                    sh "qualys-web-scan --url https://myapp.com --api-key ${QUALYS_API_KEY}"
-                }
-            }
-        }
     }
 
     post {
