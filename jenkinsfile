@@ -104,8 +104,6 @@ pipeline {
             }
         }
 
-        // Other deployment and testing stages go here...
-
     }
 
     post {

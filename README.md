@@ -24,7 +24,7 @@ TASK FOR eCI/CD exemplar pipeline
 ( I do not have Nexus or most of the requirements.)
 
 exemplar-pipeline-ws/
-├── Dockerfile                        # Docker image
+├── Dockerfile                        # Docker image but I am using podman
 ├── Jenkinsfile                       # Jenkins pipeline definition
 ├── devfile.yaml                      # Devfile for containerized development in RedHat DevSpace
 ├── pom.xml                           # Maven build file
@@ -48,12 +48,10 @@ exemplar-pipeline-ws/
         
 
 
-
-
-
 Java application with Docker support, unit testing, code coverage, and CI/CD integration using Jenkins, SonarQube, Artifactory, Qualys.
 
 Project Overview
+
 This project demonstrates a simple Java application packaged as a JAR file. It includes:
 
     Unit Testing with JUnit 5.
@@ -98,12 +96,13 @@ Setup
 
 Clone the Repository
 
-```git clone https://github.com/excellaco/exemplar-pipeline-ws.git
+git clone https://github.com/excellaco/exemplar-pipeline-ws.git
 
-cd exemplar-pipeline-ws```
+cd exemplar-pipeline-ws
 
 
 Maven Build
+
 To build the project locally:
 Ensure you have JDK 8 and Maven installed.
 Run the following command to build and run tests:
