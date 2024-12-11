@@ -2,19 +2,32 @@ pipeline {
     agent master
 
     environment {
-        SONARQUBE = 'SonarQube-irs'
-        SONAR_TOKEN = credentials('sonarqube-token')  // Add SonarQube token from Jenkins credentials
-        SONARQUBE_URL = 'http://your-sonarqube-server-url'  // URL to your SonarQube server
-        ARTIFACTORY_REPO = 'https:///artifactory/api/docker/wilson-docker'
+        // General Environment Variables
         IMAGE_NAME = 'hello-world-app'
         IMAGE_TAG = 'latest'
         CONTAINER_REGISTRY = 'docker.io'
+
+        // SonarQube Configuration
+        SONARQUBE = 'SonarQube-irs'
+        SONAR_TOKEN = credentials('sonarqube-token')  // SonarQube token
+        SONARQUBE_URL = 'http://your-sonarqube-server-url'  // URL to your SonarQube server
+
+        // Container Registry and Artifactory
+        ARTIFACTORY_REPO = 'https:///artifactory/api/docker/wilson-docker'
+
+        // Security Scanning
         QUALYS_API_KEY = credentials('qualys-api-key')
+
+        // ServiceNow for Change Management
         SERVICE_NOW_TOKEN = credentials('servicenow-token')
+
+        // URLs for Different Environments
         ECP_DEV_URL = 'https://ecp-dev.excella.com'
         ECP_PROD_URL = 'https://ecp-prod.excella.com'
         IEP_DEV_URL = 'https://iep-dev.excella.com'
         IEP_PROD_URL = 'https://iep-prod.excella.com'
+
+        // Testing URLs and Tools
         SELENIUM_GRID_URL = 'http://selenium-grid.excella.com'
         SOAPUI_TEST_URL = 'http://soapui.excella.com'
         LOADRUNNER_URL = 'http://loadrunner.excella.com'
@@ -70,6 +83,21 @@ pipeline {
             steps {
                 script {
                     sh "qualys-container-scan --image ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --api-key ${QUALYS_API_KEY}"
+                }
+            }
+        }
+
+        stage('Run Selenium Tests') {
+            steps {
+                script {
+                    // Run Selenium tests against the application (e.g., WebDriver with Selenium Grid)
+                    echo "Running Selenium tests..."
+                    
+                    // Example command that starts Selenium tests
+                    // Assuming you have a Maven/Gradle project with Selenium tests configured
+                    sh '''
+                        mvn clean test -Dselenium.grid.url=${SELENIUM_GRID_URL}
+                    '''
                 }
             }
         }
