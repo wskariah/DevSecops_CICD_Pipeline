@@ -1,19 +1,19 @@
 pipeline {
-    agent master
+    agent master  
 
     environment {
-        // General Environment Variables
-        IMAGE_NAME = 'hello-world-app'
+        // Environment Variables
+        IMAGE_NAME = 'hello-world-app'  // Use your project name
         IMAGE_TAG = 'latest'
         CONTAINER_REGISTRY = 'docker.io'
 
         // SonarQube Configuration
         SONARQUBE = 'SonarQube-irs'
-        SONAR_TOKEN = credentials('sonarqube-token')  // SonarQube token
+        SONAR_TOKEN = credentials('sonarqube-token')  // SonarQube token from Jenkins credentials
         SONARQUBE_URL = 'http://your-sonarqube-server-url'  // URL to your SonarQube server
 
-        // Container Registry and Artifactory
-        ARTIFACTORY_REPO = 'https:///artifactory/api/docker/wilson-docker'
+        // Artifactory Configuration
+        ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
 
         // Security Scanning
         QUALYS_API_KEY = credentials('qualys-api-key')
@@ -22,30 +22,47 @@ pipeline {
         SERVICE_NOW_TOKEN = credentials('servicenow-token')
 
         // URLs for Different Environments
-        ECP_DEV_URL = 'https://ecp-dev.excella.com'
-        ECP_PROD_URL = 'https://ecp-prod.excella.com'
-        IEP_DEV_URL = 'https://iep-dev.excella.com'
-        IEP_PROD_URL = 'https://iep-prod.excella.com'
+        ECP_DEV_URL = 'https://ecp-dev.example.com'
+        ECP_PROD_URL = 'https://ecp-prod.example.com'
 
         // Testing URLs and Tools
-        SELENIUM_GRID_URL = 'http://selenium-grid.excella.com'
-        SOAPUI_TEST_URL = 'http://soapui.excella.com'
-        LOADRUNNER_URL = 'http://loadrunner.excella.com'
+        SELENIUM_GRID_URL = 'http://selenium-grid.example.com'
+        SOAPUI_TEST_URL = 'http://soapui.example.com'
+        LOADRUNNER_URL = 'http://loadrunner.example.com'
     }
 
     stages {
+
+        stage('Init') {
+            steps {
+                script {
+         
+                    PULL_REQUEST = env.BRANCH_NAME !=~ /^main$/ && env.BRANCH_NAME !=~ /^release\/.+/
+                    TRUNK_BRANCH = env.BRANCH_NAME ==~ /^main$/
+                    FOR_RELEASE = env.BRANCH_NAME ==~ /^release\/.+/
+
+                    echo "PULL_REQUEST: ${PULL_REQUEST}"
+                    echo "TRUNK_BRANCH: ${TRUNK_BRANCH}"
+                    echo "FOR_RELEASE: ${FOR_RELEASE}"
+                }
+            }
+        }
+        // building the container image
+
         stage('Build Container Image') {
             steps {
                 script {
+                    echo "Building container image ${IMAGE_NAME}:${IMAGE_TAG}"
                     sh "podman build -t ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
             }
         }
 
+        // the jacoco code coverage 
         stage('Jacoco Code Coverage') {
             steps {
                 script {
-                    // Run tests and generate Jacoco code coverage report
+                    echo "Running tests and generating Jacoco code coverage report"
                     sh '''
                         mvn clean install
                         mvn test
@@ -54,24 +71,26 @@ pipeline {
             }
         }
 
+        // publish the jacoco report
         stage('Publish Jacoco Report') {
             steps {
                 script {
-                    // Archive Jacoco code coverage reports to Jenkins
-                    junit '**/target/test-classes/test-*.xml' // report path
+                    echo "Archiving Jacoco code coverage reports"
+                    junit '**/target/test-classes/test-*.xml' 
                     publishHTML(target: [
                         reportName: 'Jacoco Code Coverage Report',
-                        reportDir: 'target/site/jacoco',  // Jacoco output directory
+                        reportDir: 'target/site/jacoco', 
                         reportFiles: 'index.html'
                     ])
                 }
             }
         }
 
+        // The SonarQube Analysis
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    // Run SonarQube analysis
+                    echo "Running SonarQube analysis"
                     sh '''
                         mvn sonar:sonar -Dsonar.projectKey=${IMAGE_NAME} -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}
                     '''
@@ -79,22 +98,21 @@ pipeline {
             }
         }
 
+        // DAST Qualys Security Scan
         stage('Qualys Static Container Security Scan') {
             steps {
                 script {
+                    echo "Running static container security scan"
                     sh "qualys-container-scan --image ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --api-key ${QUALYS_API_KEY}"
                 }
             }
         }
 
+        // Testing with Selenium 
         stage('Run Selenium Tests') {
             steps {
                 script {
-                    // Run Selenium tests against the application (e.g., WebDriver with Selenium Grid)
-                    echo "Running Selenium tests..."
-                    
-                    // Example command that starts Selenium tests
-                    // Assuming you have a Maven/Gradle project with Selenium tests configured
+                    echo "Running Selenium tests"
                     sh '''
                         mvn clean test -Dselenium.grid.url=${SELENIUM_GRID_URL}
                     '''
@@ -102,9 +120,11 @@ pipeline {
             }
         }
 
+        // Using Jfrog to Push container image to Artifactory but we need to change this 
         stage('Push Container Image to Artifactory') {
             steps {
                 script {
+                    echo "Pushing container image to Artifactory"
                     sh """
                         podman login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
                         podman tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
@@ -114,20 +134,12 @@ pipeline {
             }
         }
 
+        // again we will need to change I am uisng jfrog Pull container image from Artifactory
         stage('Pull Container Image from Artifactory') {
             steps {
                 script {
+                    echo "Pulling container image from Artifactory"
                     sh "podman pull ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
-                }
-            }
-        }
-
-        stage('Change Management Integration - ServiceNow') {
-            steps {
-                script {
-                    sh '''
-                        curl -X POST -H "Authorization: Bearer ${SERVICE_NOW_TOKEN}" -H "Content-Type: application/json" -d '{"incident": {"short_description": "Deploying to ECP Dev"}}' https://excella.service-now.com/api/now/table/incident
-                    '''
                 }
             }
         }
@@ -136,15 +148,15 @@ pipeline {
 
     post {
         always {
-            echo 'Pipeline finished!'
+            echo 'The exemplar Pipeline finished!'
         }
 
         success {
-            echo 'Pipeline successfully completed!'
+            echo 'The Exemplar Pipeline successfully completed!'
         }
 
         failure {
-            echo 'Pipeline failed!'
+            echo 'The exemplar Pipeline failed!'
         }
     }
 }
