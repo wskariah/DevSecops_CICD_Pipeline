@@ -1,3 +1,5 @@
+// This is a similar replicated jenkins file to be like the ones we are using for the irs client. There are integration that needs to be done
+
 pipeline {
     agent master  
 
@@ -12,7 +14,7 @@ pipeline {
         SONAR_TOKEN = credentials('sonarqube-token')  // SonarQube token from Jenkins credentials
         SONARQUBE_URL = 'http://your-sonarqube-server-url'  // URL to your SonarQube server
 
-        // Artifactory Configuration
+        // Artifactory Configuration (We will add new one)
         ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
 
         // Security Scanning
@@ -21,7 +23,7 @@ pipeline {
         // ServiceNow for Change Management
         SERVICE_NOW_TOKEN = credentials('servicenow-token')
 
-        // URLs for Different Environments
+        // URLs for Different Environments- THIS NEEDS TO BE IDENTIFIED. I am thinking k8 not sure willl need to decide 
         ECP_DEV_URL = 'https://ecp-dev.example.com'
         ECP_PROD_URL = 'https://ecp-prod.example.com'
 
