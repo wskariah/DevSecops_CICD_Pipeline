@@ -17,33 +17,33 @@ components:
       memoryLimit: 2Gi
       cpuLimit: 1  # CPU limit for OpenShift/Red Hat Dev Spaces
       cpuRequest: 500m  # CPU request for OpenShift/Red Hat Dev Spaces
-      mountSources: true  # Mount the source code directory into the container
-      mountPath: /projects  # Path inside the container where the code will be mounted
+      mountSources: true  
+      mountPath: /projects 
       command:
         - "mvn"
         - "clean"
         - "install"
       args:
-        - "-DskipTests"  # Skip tests in the build step
+        - "-DskipTests"  
       workingDir: /projects 
 
   # second container for running/debugging the application
   - name: java-debugger
     container:
-      image: maven:3.8-openjdk-11  # Maven with OpenJDK 11
+      image: maven:3.8-openjdk-11  
       memoryLimit: 2Gi
       cpuLimit: 1
       cpuRequest: 500m
-      mountSources: true  # Mount the source code
+      mountSources: true 
       mountPath: /projects
       ports:
         - containerPort: 8080  # Port for Spring Boot app or Java server
         - containerPort: 5005  # Port for remote debugging (useful for IDE)
       command:
         - "mvn"
-        - "spring-boot:run"  # command to start your app (Spring Boot here)
+        - "spring-boot:run" 
       args:
-        - "-Dspring-boot.run.profiles=dev"  # Set dev profile or any environment-specific properties
+        - "-Dspring-boot.run.profiles=dev"  
       env:
         - name: JAVA_OPTS
           value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"  # Enable debugging

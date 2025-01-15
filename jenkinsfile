@@ -1,18 +1,18 @@
 // This is a similar replicated jenkins file to be like the ones we are using for the irs client. There are integration that needs to be done
 
 pipeline {
-    agent master  
+    agent master
 
     environment {
         // Environment Variables
-        IMAGE_NAME = 'hello-world-app'  // Use your project name
+        IMAGE_NAME = 'hello-world-app' 
         IMAGE_TAG = 'latest'
         CONTAINER_REGISTRY = 'docker.io'
 
         // SonarQube Configuration
         SONARQUBE = 'SonarQube-irs'
-        SONAR_TOKEN = credentials('sonarqube-token')  // SonarQube token from Jenkins credentials
-        SONARQUBE_URL = 'http://your-sonarqube-server-url'  // URL to your SonarQube server
+        SONAR_TOKEN = credentials('sonarqube-token') 
+        SONARQUBE_URL = 'http://your-sonarqube-server-url'  
 
         // Artifactory Configuration (We will add new one)
         ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
@@ -23,7 +23,7 @@ pipeline {
         // ServiceNow for Change Management
         SERVICE_NOW_TOKEN = credentials('servicenow-token')
 
-        // URLs for Different Environments- THIS NEEDS TO BE IDENTIFIED. I am thinking k8 not sure willl need to decide 
+        // URLs for Different Environments- THIS NEEDS TO BE IDENTIFIED
         ECP_DEV_URL = 'https://ecp-dev.example.com'
         ECP_PROD_URL = 'https://ecp-prod.example.com'
 
@@ -31,6 +31,12 @@ pipeline {
         SELENIUM_GRID_URL = 'http://selenium-grid.example.com'
         SOAPUI_TEST_URL = 'http://soapui.example.com'
         LOADRUNNER_URL = 'http://loadrunner.example.com'
+
+        // OpenShift Configuration
+        OPENSHIFT_PROJECT = 'openshift-project'
+        OPENSHIFT_SERVER = 'https://openshift.carbon.com:6443'
+        KUBECONFIG = '~/.kube/config'  
+        KUSTOMIZE_PATH = 'k8s/overlays/openshift' 
     }
 
     stages {
@@ -38,7 +44,6 @@ pipeline {
         stage('Init') {
             steps {
                 script {
-         
                     PULL_REQUEST = env.BRANCH_NAME !=~ /^main$/ && env.BRANCH_NAME !=~ /^release\/.+/
                     TRUNK_BRANCH = env.BRANCH_NAME ==~ /^main$/
                     FOR_RELEASE = env.BRANCH_NAME ==~ /^release\/.+/
@@ -49,8 +54,8 @@ pipeline {
                 }
             }
         }
-        // building the container image
 
+        // Building the container image
         stage('Build Container Image') {
             steps {
                 script {
@@ -60,7 +65,7 @@ pipeline {
             }
         }
 
-        // the jacoco code coverage 
+        // Jacoco Code Coverage
         stage('Jacoco Code Coverage') {
             steps {
                 script {
@@ -73,7 +78,7 @@ pipeline {
             }
         }
 
-        // publish the jacoco report
+        // Publish Jacoco Report
         stage('Publish Jacoco Report') {
             steps {
                 script {
@@ -122,7 +127,7 @@ pipeline {
             }
         }
 
-        // Using Jfrog to Push container image to Artifactory but we need to change this 
+        // Push container image to Artifactory (or Nexus)
         stage('Push Container Image to Artifactory') {
             steps {
                 script {
@@ -136,12 +141,21 @@ pipeline {
             }
         }
 
-        // again we will need to change I am uisng jfrog Pull container image from Artifactory
-        stage('Pull Container Image from Artifactory') {
+        // Deploying to OpenShift using Kustomize
+        stage('Deploy to OpenShift with Kustomize') {
             steps {
                 script {
-                    echo "Pulling container image from Artifactory"
-                    sh "podman pull ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    echo "Deploying container image to OpenShift using Kustomize"
+                    sh """
+                        # Login to OpenShift
+                        oc login ${OPENSHIFT_SERVER} --kubeconfig ${KUBECONFIG}
+                        
+                        # Set OpenShift project
+                        oc project ${OPENSHIFT_PROJECT}
+                        
+                        # Apply Kustomize overlay to deploy to OpenShift
+                        kubectl apply -k ${KUSTOMIZE_PATH}
+                    """
                 }
             }
         }
