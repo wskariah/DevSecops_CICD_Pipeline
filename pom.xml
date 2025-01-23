@@ -68,6 +68,7 @@
 
     <!-- Build Configuration -->
     <build>
+        <testSourceDirectory>src/test/groovy</testSourceDirectory>
         <plugins>
             <!-- Jacoco Plugin for Code Coverage -->
             <plugin>
