@@ -1,0 +1,42 @@
+Executing on agent [label:master]
+PULL_REQUEST: true
+TRUNK_BRANCH: false
+FOR_RELEASE: false
+Building container image hello-world-app:latest
+sh: podman build -t docker.io/hello-world-app:latest .
+Running tests and generating Jacoco code coverage report
+sh: 
+                        mvn clean install
+                        mvn test
+                    
+Archiving Jacoco code coverage reports
+publishHTML: [target:[reportName:Jacoco Code Coverage Report, reportDir:target/site/jacoco, reportFiles:index.html]]
+Running SonarQube analysis
+sh: 
+                        mvn sonar:sonar -Dsonar.projectKey=${IMAGE_NAME} -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}
+                    
+Running static container security scan
+sh: qualys-container-scan --image docker.io/hello-world-app:latest --api-key null
+Running Selenium tests
+sh: 
+                        mvn clean test -Dselenium.grid.url=${SELENIUM_GRID_URL}
+                    
+Pushing container image to Artifactory
+sh: 
+                        podman login https://artifactory.example.com/api/docker/repo -u user -p password
+                        podman tag docker.io/hello-world-app:latest https://artifactory.example.com/api/docker/repo/hello-world-app:latest
+                        podman push https://artifactory.example.com/api/docker/repo/hello-world-app:latest
+                    
+Deploying container image to OpenShift using Kustomize
+sh: 
+                        # Login to OpenShift
+                        oc login https://openshift.carbon.com:6443 --kubeconfig ~/.kube/config
+                        
+                        # Set OpenShift project
+                        oc project openshift-project
+                        
+                        # Apply Kustomize overlay to deploy to OpenShift
+                        kubectl apply -k k8s/overlays/openshift
+                    
+The exemplar Pipeline finished!
+The Exemplar Pipeline successfully completed!
