@@ -1,4 +1,4 @@
-package com.example
+package com.example.tools
 
 class StandardOutput {
     StringWriter _output;

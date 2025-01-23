@@ -1,5 +1,6 @@
-package com.example
+package com.example.pipeline
 
+import com.example.tools.StandardOutput
 import com.lesfurets.jenkins.unit.declarative.DeclarativePipelineTest
 import org.approvaltests.Approvals
 import org.junit.jupiter.api.AfterEach
