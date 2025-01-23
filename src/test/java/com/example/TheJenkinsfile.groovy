@@ -12,8 +12,7 @@ class TheJenkinsfile extends DeclarativePipelineTest {
     void runs() {
         runScript("Jenkinsfile")
         assertJobStatusSuccess()
-        String capturedOutput = _output.toString()
-        Approvals.verify(capturedOutput)
+        Approvals.verify(_output.toString())
     }
 
     @BeforeEach
@@ -23,32 +22,15 @@ class TheJenkinsfile extends DeclarativePipelineTest {
         arrangeGlobalProperties()
         stubPublishHTML()
         stubSh()
-        captureStdOutput()
+        _output.capture()
     }
 
     @AfterEach
     void tearDown() {
-        restoreStdOutput()
+        _output.restore()
     }
 
-    private restoreStdOutput() {
-        System.setOut(_originalOut)
-    }
-
-    private void captureStdOutput() {
-        _originalOut = System.out
-        _output = new StringWriter()
-        PrintWriter printWriter = new PrintWriter(_output)
-        System.setOut(new PrintStream(new OutputStream() {
-            @Override
-            void write(int b) throws IOException {
-                printWriter.write(b)
-            }
-        }))
-    }
-
-    StringWriter _output;
-    PrintStream _originalOut;
+    StandardOutput _output = new StandardOutput()
 
     private void arrangeGlobalProperties() {
         binding.master = "master"
@@ -70,3 +52,4 @@ class TheJenkinsfile extends DeclarativePipelineTest {
     }
 
 }
+
