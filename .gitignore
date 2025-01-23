@@ -55,4 +55,7 @@ spring-boot-devtools
 
 # User-specific files (for example, if you use local dev setup or personal settings)
 *.user
+
+# Approval Tests
 .approval_tests_temp/
+*.runs.received.txt
