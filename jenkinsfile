@@ -1,5 +1,3 @@
-// This is a similar replicated jenkins file to be like the ones we are using for the irs client. There are integration that needs to be done
-
 pipeline {
     agent master
 
@@ -37,10 +35,13 @@ pipeline {
         OPENSHIFT_SERVER = 'https://openshift.carbon.com:6443'
         KUBECONFIG = '~/.kube/config'  
         KUSTOMIZE_PATH = 'k8s/overlays/openshift' 
+
+        // Maven Properties for Version and Timestamp
+        MAVEN_VERSION = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true).trim()
+        BUILD_TIMESTAMP = sh(script: 'date +%Y-%m-%d_%H-%M-%S', returnStdout: true).trim()
     }
 
     stages {
-
         stage('Init') {
             steps {
                 script {
@@ -59,8 +60,10 @@ pipeline {
         stage('Build Container Image') {
             steps {
                 script {
-                    echo "Building container image ${IMAGE_NAME}:${IMAGE_TAG}"
-                    sh "podman build -t ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    echo "Building container image ${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}"
+                    sh """
+                        podman build -t ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} .
+                    """
                 }
             }
         }
@@ -110,7 +113,7 @@ pipeline {
             steps {
                 script {
                     echo "Running static container security scan"
-                    sh "qualys-container-scan --image ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} --api-key ${QUALYS_API_KEY}"
+                    sh "qualys-container-scan --image ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} --api-key ${QUALYS_API_KEY}"
                 }
             }
         }
@@ -134,8 +137,8 @@ pipeline {
                     echo "Pushing container image to Artifactory"
                     sh """
                         podman login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
-                        podman tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
-                        podman push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                        podman tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                        podman push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
                     """
                 }
             }
@@ -159,7 +162,6 @@ pipeline {
                 }
             }
         }
-
     }
 
     post {

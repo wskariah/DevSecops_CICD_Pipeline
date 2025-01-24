@@ -1,8 +1,6 @@
 
 The Directory Structure for Kustomize
 
-
-.
 ├── base/
 │   ├── deployment.yaml
 │   ├── service.yaml

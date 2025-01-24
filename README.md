@@ -116,6 +116,14 @@ To generate the Jacoco reports:
 
 `mvn jacoco:report`
 
+==========================
+TO Run Local
+
+mvn clean
+mvn spring-boot:run
+http://localhost:8080/
+
+===========================
 
 Maven Wrapper:
 Download the Wrapper: Run the following command in the root of your Maven project to generate the wrapper scripts:
