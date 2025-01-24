@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
         - name: hello-world-app
-          image: "your-nexus-repository/your-app-name:latest"
+          image: "nexus-repository/app-name:latest"
           ports:
             - containerPort: 8080

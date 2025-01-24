@@ -107,14 +107,13 @@ To build the project locally:
 Ensure you have JDK 8 and Maven installed.
 Run the following command to build and run tests:
 
-    mvn clean install
+mvn clean install
         
 This will: Compile the code. Run unit tests using JUnit 5.Generate code coverage reports using JaCoCo.
 
 To generate the Jacoco reports:
 
-
-`mvn jacoco:report`
+mvn jacoco:report
 
 ==========================
 TO Run Local
@@ -213,3 +212,10 @@ This project demonstrates a comprehensive CI/CD pipeline with a focus on:
     Containerization with Podman/Docker
     Code coverage and security scans
     Integration with tools like SonarQube, Artifactory, Qualys, and ServiceNow
+================================================================================================
+
+REF:
+
+https://www.baeldung.com/spark-framework-rest-api
+
+https://kustomize.io/
