@@ -10,73 +10,30 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <repositories>
-        <repository>
-            <id>jenkins-ci-releases</id>
-            <url>https://repo.jenkins-ci.org/releases/</url>
-        </repository>
-    </repositories>
-
     <!-- Properties -->
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+
+        <!-- Git Commit ID -->
         <git.commit.id>${git.commit.id.abbrev}</git.commit.id>
+
+        <!-- Build Timestamp -->
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
-        <junit.jupiter.version>5.7.0</junit.jupiter.version>  <!-- JUnit 5 Version -->
-        <spring.boot.version>2.5.4</spring.boot.version>  <!-- Spring Boot Version -->
+
+        <!-- Project Version -->
+        <project.version>1.0.0</project.version>
     </properties>
 
-<<<<<<< HEAD
-    <!-- Dependencies -->
-    <dependencies>
-        <!-- JUnit for unit testing -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.7.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.7.0</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <!-- Jenkins Pipeline Unit for testing Jenkins pipelines -->
-        <dependency>
-            <groupId>com.lesfurets</groupId>
-            <artifactId>jenkins-pipeline-unit</artifactId>
-            <version>1.24</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.approvaltests</groupId>
-            <artifactId>approvaltests</artifactId>
-            <version>24.14.2</version>
-            <scope>test</scope>
-        </dependency>
-=======
-    <!-- SCM Information for Build Number Plugin -->
     <scm>
         <connection>scm:git:git@github.com:excellaco/exemplar-pipeline-ws.git</connection>
         <developerConnection>scm:git@github.com:excellaco/exemplar-pipeline-ws.git</developerConnection>
         <url>https://github.com/excellaco/exemplar-pipeline-ws.git</url>
     </scm>
->>>>>>> 62e2c9b (updated the files to use Kustomize and Sprk framework)
 
     <build>
-        <testSourceDirectory>src/test/groovy</testSourceDirectory>
         <plugins>
-            <!-- Spring Boot Maven Plugin to build and run the Spring Boot application -->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
-            </plugin>
-
-            <!-- Maven Build Number Plugin to inject Git commit ID -->
+            <!-- Build Number Plugin to inject the Git commit ID -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>buildnumber-maven-plugin</artifactId>
@@ -94,7 +51,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Resources plugin to filter and replace placeholders -->
+            <!-- Maven Resources Plugin for filtering application.properties -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -109,7 +66,7 @@
                             <resources>
                                 <resource>
                                     <directory>src/main/resources</directory>
-                                    <filtering>true</filtering>
+                                    <filtering>true</filtering> <!-- Enable filtering -->
                                 </resource>
                             </resources>
                         </configuration>
@@ -117,42 +74,49 @@
                 </executions>
             </plugin>
 
-            <!-- Surefire Plugin for running tests -->
+            <!-- Surefire Plugin to run tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version> <!-- Surefire plugin to run tests -->
             </plugin>
+
+            <!-- Spring Boot Maven Plugin to build and run the Spring Boot application -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.5.4</version>
+            </plugin>
         </plugins>
     </build>
 
     <dependencies>
-        <!-- Spring Boot Starter Web (includes embedded Tomcat and Spring MVC) -->
+        <!-- Spark Java Framework Dependency -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>${spring.boot.version}</version> <!-- Explicit version here -->
+            <groupId>com.sparkjava</groupId>
+            <artifactId>spark-core</artifactId>
+            <version>2.9.3</version> <!-- Use a version compatible with your code -->
         </dependency>
 
-        <!-- JUnit 5 dependencies -->
+        <!-- JUnit 5 Dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.jupiter.version}</version> <!-- Use version from properties -->
+            <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.jupiter.version}</version>
+            <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit.jupiter.version}</version>
+            <version>5.7.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -160,53 +124,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring.boot.version}</version>
+            <version>2.5.4</version>
             <scope>test</scope>
         </dependency>
-    <!-- Spring Boot Starter Web (includes embedded Tomcat and Spring MVC) -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-web</artifactId>
-        <version>${spring.boot.version}</version>
-    </dependency>
-
-    <!-- Spark Java Dependency -->
-    <dependency>
-        <groupId>com.sparkjava</groupId>
-        <artifactId>spark-core</artifactId>
-        <version>2.9.3</version> <!-- Use a version compatible with your code -->
-    </dependency>
-
-    <!-- JUnit 5 dependencies -->
-    <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-api</artifactId>
-        <version>${junit.jupiter.version}</version> <!-- Use version from properties -->
-        <scope>test</scope>
-    </dependency>
-
-    <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-engine</artifactId>
-        <version>${junit.jupiter.version}</version>
-        <scope>test</scope>
-    </dependency>
-
-    <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter-params</artifactId>
-        <version>${junit.jupiter.version}</version>
-        <scope>test</scope>
-    </dependency>
-
-    <!-- Spring Boot Starter Test for testing Spring Boot applications -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-test</artifactId>
-        <version>${spring.boot.version}</version>
-        <scope>test</scope>
-    </dependency>
-</dependencies>
+    </dependencies>
 
     <profiles>
         <profile>
