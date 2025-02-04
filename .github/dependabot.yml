@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"  # Frequency of update checks (daily, weekly, or monthly)
+    versioning-strategy: "increase"  # Only updates to higher versions (safer for avoiding breaking changes)
+    allow:
+      - dependency-type: "direct"  # Update only direct dependencies listed in the pom.xml
+      - dependency-type: "indirect"  
