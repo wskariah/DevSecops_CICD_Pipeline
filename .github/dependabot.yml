@@ -1,73 +1,15 @@
 version: 2
 updates:
-
-  # Core Java/SpringBoot Dependencies
   - package-ecosystem: "maven"
-    directory: "/"  # Root of your Java/SpringBoot project
+    directory: "/" 
     schedule:
-      interval: "weekly" # Or "daily" if you're very aggressive
-    versioning-strategy: "increase" # Safer for avoiding breaking changes
+      interval: "daily"
+    versioning-strategy: "increase" 
     allow:
       - dependency-type: "direct"
       - dependency-type: "indirect"
     labels:
       - "dependencies"
       - "java"
-      - "springboot" # More specific label
-      - "security" # Important for security updates
-      - "priority:high" # For core dependencies
-    assignees:
-      - "your-github-username"
-    reviewers:
-      - "another-github-username"
-    open-pull-requests-limit: 2 # Limit core dependency PRs
-
-  # Plugin Updates (Be Cautious)
-  - package-ecosystem: "maven"
-    directory: "/"
-    schedule:
-      interval: "monthly"  # Less frequent for plugins
-    versioning-strategy: "increase"  # Be very careful with plugins
-    allow:
-      - dependency-type: "direct" # Only direct plugin updates
-    labels:
-      - "dependencies"
-      - "java"
-      - "maven"
-      - "type:plugin"
-      - "security" # Plugins can have vulnerabilities too
-    assignees:
-      - "your-github-username"
-    reviewers:
-      - "another-github-username"
-    open-pull-requests-limit: 1 # Limit plugin PRs
-
-  # Jenkins Plugins (If applicable)
-  - package-ecosystem: "jenkins"
-    directory: "Jenkinsfile" # Or wherever your Jenkinsfile/plugins.txt is
-    schedule:
-      interval: "monthly" # Jenkins plugins less frequent
-    labels:
-      - "dependencies"
-      - "jenkins"
-      - "security" # Jenkins plugins are security-critical
-    assignees:
-      - "your-jenkins-admin" # Assign to Jenkins admin
-    reviewers:
-      - "another-jenkins-admin"
-    open-pull-requests-limit: 1 # Limit Jenkins plugin PRs
-
-  # Docker Images (If applicable)
-  - package-ecosystem: "docker"
-    directory: "." # Or wherever your Dockerfile is
-    schedule:
-      interval: "weekly" # Or "daily" for base image updates
-    labels:
-      - "dependencies"
-      - "docker"
-      - "security" # Docker images critical for security
-    assignees:
-      - "your-devops-username"
-    reviewers:
-      - "another-devops-username"
-    open-pull-requests-limit: 2 # Allow a couple of Docker PRs
+      - "springboot"
+    open-pull-requests-limit: 2 
