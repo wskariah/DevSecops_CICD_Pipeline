@@ -4,9 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    # versioning-strategy goes HERE, inside the maven config:
-    maven:
-      versioning-strategy: "increase"
+    versioning-strategy: "increase"  # This is where you should place versioning strategy for Maven
     allow:
       - dependency-type: "direct"
       - dependency-type: "indirect"
