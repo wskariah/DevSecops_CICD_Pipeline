@@ -19,7 +19,7 @@ jobs:
       # Step 2: Clone the policy-as-code repository (if separate)
       - name: Clone Policy Repository
         run: |
-          git clone https://github.com/${{ secrets.GITHUB_ACTOR }}:${{ secrets.GH_TOKEN }}@github.com/excellaco/exemplar-pipeline-ws.git policies
+          git clone https://github.com/${{ secrets.GITHUB_ACTOR }}:${{ secrets.GH_TOKEN }}@github.com:excellaco/policy-as-code-opa.git policies
 
       # Step 3: Install OPA
       - name: Install OPA
