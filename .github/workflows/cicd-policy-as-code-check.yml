@@ -1,0 +1,41 @@
+name: CI/CD Pipeline with OPA Policy Enforcement
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - '*'
+
+jobs:
+  check-opa-policy:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the application repository
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        
+      # Step 2: Clone the policy-as-code repository (if separate)
+      - name: Clone Policy Repository
+        run: |
+          git clone https://github.com/excellaco/policy-as-code-opa.git policies
+
+      # Step 3: Install OPA
+      - name: Install OPA
+        run: |
+          curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/v0.42.0/opa-linux-amd64
+          chmod 755 /usr/local/bin/opa
+
+      # Step 4: Run OPA policy against GitHub event
+      - name: Run OPA policy check
+        run: |
+          opa eval --input <path-to-your-github-event-file> --data policies/cicd/scan-on-pr.rego "data.cicd.deny_direct_commits_to_main"
+          
+      # Step 5: Apply policy result
+      - name: Apply policy result
+        run: |
+          if [ $? -ne 0 ]; then
+            echo "Policy check failed: Direct commits to main are not allowed."
+            exit 1
+          fi
