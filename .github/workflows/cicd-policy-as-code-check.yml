@@ -24,22 +24,20 @@ jobs:
       # Step 3: Install OPA
       - name: Install OPA
         run: |
-          curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/v0.42.0/opa-linux-amd64
+          # Download the latest OPA version
+          curl -L -o /usr/local/bin/opa https://openpolicyagent.org/downloads/latest/opa-linux-amd64
           chmod 755 /usr/local/bin/opa
 
-      # Step 4: Run OPA policy check using GitHub event data
+      # Step 4: Verify OPA installation
+      - name: Verify OPA installation
+        run: |
+          opa version
+
+      # Step 5: Run OPA policy check using GitHub event data
       - name: Run OPA policy check
         run: |
           # Save the GitHub event payload into a file (so OPA can read it)
           echo "${{ toJson(github.event) }}" > github_event.json
 
           # Run OPA evaluation using the event file and policy
-          opa eval --input github_event.json --data policies/cicd/scan-on-pr.rego "data.cicd.deny_direct_commits_to_main"
-          
-      # Step 5: Apply policy result
-      - name: Apply policy result
-        run: |
-          if [ $? -ne 0 ]; then
-            echo "Policy check failed: Direct commits to main are not allowed."
-            exit 1
-          fi
+          opa eval --input github_event.j
