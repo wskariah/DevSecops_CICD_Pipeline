@@ -36,10 +36,10 @@ jobs:
       # Step 5: Run OPA policy check using GitHub event data
       - name: Run OPA policy check
         run: |
-          # Save the GitHub event payload into a file (so OPA can read it)
-          echo "${{ toJson(github.event) }}" > githubevent.json
+          echo '${{ toJson(github.event) }}' > githubevent.json
           cat githubevent.json  # Debugging step to verify contents of the generated file
-      
+          
           # Run OPA evaluation using the event file and policy
-          opa eval --input githubevent.json --data policies --entrypoint "policy.rego" "data.policy.allow"
+          opa eval --input githubevent.json --data policies --entrypoint policy.rego "data.policy.allow"
+
     
