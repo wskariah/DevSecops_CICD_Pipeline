@@ -12,32 +12,25 @@ jobs:
   check-opa-policy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the application repository
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      # Step 2: Clone the policy-as-code repository
       - name: Clone Policy Repository
         run: |
           git clone https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/excellaco/policy-as-code-opa.git policies
 
-      # Step 3: Install OPA
       - name: Install OPA
-        run: |
-          # Download the latest OPA version
-          curl -L -o /usr/local/bin/opa https://github.com/open-policy-agent/opa/releases/download/v1.1.0/opa_linux_amd64
-          chmod 755 /usr/local/bin/opa
+        uses: actions/setup-go@v3  # Use Go action for easier OPA installation
+        with:
+          go-version: '^1.20' # Or your preferred Go version
 
-      # Step 4: Verify OPA installation
+      - name: Install OPA
+        run: go install github.com/open-policy-agent/opa/cmd/opa@latest
+
       - name: Verify OPA installation
-        run: |
-          opa version
+        run: opa version
 
-      # Step 5: Run OPA policy check using GitHub event data
       - name: Run OPA policy check
         run: |
-          # Save the GitHub event payload into a file (so OPA can read it)
           echo "${{ toJson(github.event) }}" > github_event.json
-
-          # Run OPA evaluation using the event file and policy
-          opa eval --input github_event.json --data policies --entrypoint "policy.rego" "data.policy.allow"
+          opa eval --input github_event.json --data policies --entrypoint "data.policy.allow"
