@@ -37,7 +37,7 @@ jobs:
       - name: Run OPA policy check
         run: |
           # Save the GitHub event payload into a file (so OPA can read it)
-          echo "${{ toJson(github.event) }}" > github event.json
+          echo "${{ toJson(github.event) }}" > github_event.json
           cat github_event.json  # Debugging step to verify contents of the generated file
       
           # Run OPA evaluation using the event file and policy
