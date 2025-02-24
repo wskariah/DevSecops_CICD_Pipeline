@@ -1,5 +1,5 @@
 pipeline {
-    agent Built-In Node
+    agent { label 'Built-In Node' }
 
     environment {
         // Environment Variables
