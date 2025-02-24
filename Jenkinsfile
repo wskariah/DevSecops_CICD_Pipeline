@@ -1,5 +1,5 @@
 pipeline {
-    agent master
+    agent Built-In Node
 
     environment {
         // Environment Variables
