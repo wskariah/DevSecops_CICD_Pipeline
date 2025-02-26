@@ -16,10 +16,10 @@ pipeline {
         ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
 
         // Security Scanning
-        QUALYS_API_KEY = credentials('qualys-api-key')
+        //QUALYS_API_KEY = credentials('qualys-api-key')
 
         // ServiceNow for Change Management
-        SERVICE_NOW_TOKEN = credentials('servicenow-token')
+        //SERVICE_NOW_TOKEN = credentials('servicenow-token')
 
         // URLs for Different Environments- THIS NEEDS TO BE IDENTIFIED
         ECP_DEV_URL = 'https://ecp-dev.example.com'
