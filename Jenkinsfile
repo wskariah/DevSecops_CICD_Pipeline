@@ -10,7 +10,7 @@ pipeline {
         // SonarQube Configuration
         SONARQUBE = 'SonarQube-irs'
         SONAR_TOKEN = credentials('sonarqube-token') 
-        SONARQUBE_URL = 'http://your-sonarqube-server-url'  
+        SONARQUBE_URL = 'http://54.80.16.163:9000/' //'http://your-sonarqube-server-url'  
 
         // Artifactory Configuration (We will add new one)
         ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
