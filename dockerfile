@@ -25,7 +25,7 @@ ENV VERSION=${VERSION}
 ENV TIMESTAMP=${TIMESTAMP}
 
 
-COPY --from=build /app/target/hello-world.jar /app/hello-world.jar
+COPY --from=build /app/target/hello-world*.jar /app/hello-world.jar
 
 # Expose the port
 EXPOSE 8080
