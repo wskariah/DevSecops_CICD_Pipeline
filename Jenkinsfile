@@ -10,31 +10,31 @@ pipeline {
         // SonarQube Configuration
         SONARQUBE = 'SonarQube-irs'
         SONAR_TOKEN = credentials('sonarqube-token') 
-        SONARQUBE_URL = 'http://54.80.16.163:9000/' //'http://your-sonarqube-server-url'  
+        SONARQUBE_URL = 'http://your-sonarqube-server-url'  
 
         // Artifactory Configuration (We will add new one)
-        ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
+        // ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
 
-        // Security Scanning
-        //QUALYS_API_KEY = credentials('qualys-api-key')
+        // // Security Scanning
+        // //QUALYS_API_KEY = credentials('qualys-api-key')
 
-        // ServiceNow for Change Management
-        //SERVICE_NOW_TOKEN = credentials('servicenow-token')
+        // // ServiceNow for Change Management
+        // //SERVICE_NOW_TOKEN = credentials('servicenow-token')
 
-        // URLs for Different Environments- THIS NEEDS TO BE IDENTIFIED
-        ECP_DEV_URL = 'https://ecp-dev.example.com'
-        ECP_PROD_URL = 'https://ecp-prod.example.com'
+        // // URLs for Different Environments- THIS NEEDS TO BE IDENTIFIED
+        // ECP_DEV_URL = 'https://ecp-dev.example.com'
+        // ECP_PROD_URL = 'https://ecp-prod.example.com'
 
-        // Testing URLs and Tools
-        SELENIUM_GRID_URL = 'http://selenium-grid.example.com'
-        SOAPUI_TEST_URL = 'http://soapui.example.com'
-        LOADRUNNER_URL = 'http://loadrunner.example.com'
+        // // Testing URLs and Tools
+        // SELENIUM_GRID_URL = 'http://selenium-grid.example.com'
+        // SOAPUI_TEST_URL = 'http://soapui.example.com'
+        // LOADRUNNER_URL = 'http://loadrunner.example.com'
 
-        // OpenShift Configuration
-        OPENSHIFT_PROJECT = 'openshift-project'
-        OPENSHIFT_SERVER = 'https://openshift.carbon.com:6443'
-        KUBECONFIG = '~/.kube/config'  
-        KUSTOMIZE_PATH = 'k8s/overlays/openshift' 
+        // // OpenShift Configuration
+        // OPENSHIFT_PROJECT = 'openshift-project'
+        // OPENSHIFT_SERVER = 'https://openshift.carbon.com:6443'
+        // KUBECONFIG = '~/.kube/config'  
+        // KUSTOMIZE_PATH = 'k8s/overlays/openshift' 
 
         // Maven Properties for Version and Timestamp
         MAVEN_VERSION = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true).trim()
@@ -45,9 +45,9 @@ pipeline {
         stage('Init') {
             steps {
                 script {
-                    PULL_REQUEST = env.BRANCH_NAME !=~ /^main$/ && env.BRANCH_NAME !=~ /^release\/.+/
-                    TRUNK_BRANCH = env.BRANCH_NAME ==~ /^main$/
-                    FOR_RELEASE = env.BRANCH_NAME ==~ /^release\/.+/
+                    def PULL_REQUEST = env.BRANCH_NAME !=~ /^main$/ && env.BRANCH_NAME !=~ /^release\/.+/
+                    def TRUNK_BRANCH = env.BRANCH_NAME ==~ /^main$/
+                    def FOR_RELEASE = env.BRANCH_NAME ==~ /^release\/.+/
 
                     echo "PULL_REQUEST: ${PULL_REQUEST}"
                     echo "TRUNK_BRANCH: ${TRUNK_BRANCH}"
