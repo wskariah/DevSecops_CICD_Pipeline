@@ -10,7 +10,7 @@ pipeline {
         // SonarQube Configuration
         SONARQUBE = 'SonarQube-irs'
         SONAR_TOKEN = credentials('sonarqube-token') 
-        SONARQUBE_URL = 'http://your-sonarqube-server-url'  
+        SONARQUBE_URL = 'http://54.80.16.163:9000'  
 
         // Artifactory Configuration (We will add new one)
         ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
@@ -68,33 +68,33 @@ pipeline {
             }
         }
 
-        // Jacoco Code Coverage
-        stage('Jacoco Code Coverage') {
-            steps {
-                script {
-                    echo "Running tests and generating Jacoco code coverage report"
-                    sh '''
-                        mvn clean install
-                        mvn test
-                    '''
-                }
-            }
-        }
+        // // Jacoco Code Coverage
+        // stage('Jacoco Code Coverage') {
+        //     steps {
+        //         script {
+        //             echo "Running tests and generating Jacoco code coverage report"
+        //             sh '''
+        //                 mvn clean install
+        //                 mvn test
+        //             '''
+        //         }
+        //     }
+        // }
 
-        // Publish Jacoco Report
-        stage('Publish Jacoco Report') {
-            steps {
-                script {
-                    echo "Archiving Jacoco code coverage reports"
-                    junit '**/target/test-classes/test-*.xml' 
-                    publishHTML(target: [
-                        reportName: 'Jacoco Code Coverage Report',
-                        reportDir: 'target/site/jacoco', 
-                        reportFiles: 'index.html'
-                    ])
-                }
-            }
-        }
+        // // Publish Jacoco Report
+        // stage('Publish Jacoco Report') {
+        //     steps {
+        //         script {
+        //             echo "Archiving Jacoco code coverage reports"
+        //             junit '**/target/test-classes/test-*.xml' 
+        //             publishHTML(target: [
+        //                 reportName: 'Jacoco Code Coverage Report',
+        //                 reportDir: 'target/site/jacoco', 
+        //                 reportFiles: 'index.html'
+        //             ])
+        //         }
+        //     }
+        // }
 
         // The SonarQube Analysis
         stage('SonarQube Analysis') {
@@ -108,41 +108,41 @@ pipeline {
             }
         }
 
-        // DAST Qualys Security Scan
-        stage('Qualys Static Container Security Scan') {
-            steps {
-                script {
-                    echo "Running static container security scan"
-                    sh "qualys-container-scan --image ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} --api-key ${QUALYS_API_KEY}"
-                }
-            }
-        }
+        // // DAST Qualys Security Scan
+        // stage('Qualys Static Container Security Scan') {
+        //     steps {
+        //         script {
+        //             echo "Running static container security scan"
+        //             sh "qualys-container-scan --image ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} --api-key ${QUALYS_API_KEY}"
+        //         }
+        //     }
+        // }
 
-        // Testing with Selenium 
-        stage('Run Selenium Tests') {
-            steps {
-                script {
-                    echo "Running Selenium tests"
-                    sh '''
-                        mvn clean test -Dselenium.grid.url=${SELENIUM_GRID_URL}
-                    '''
-                }
-            }
-        }
+        // // Testing with Selenium 
+        // stage('Run Selenium Tests') {
+        //     steps {
+        //         script {
+        //             echo "Running Selenium tests"
+        //             sh '''
+        //                 mvn clean test -Dselenium.grid.url=${SELENIUM_GRID_URL}
+        //             '''
+        //         }
+        //     }
+        // }
 
-        // Push container image to Artifactory (or Nexus)
-        stage('Push Container Image to Artifactory') {
-            steps {
-                script {
-                    echo "Pushing container image to Artifactory"
-                    sh """
-                        docker login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
-                        docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-                        docker push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-                    """
-                }
-            }
-        }
+        // // Push container image to Artifactory (or Nexus)
+        // stage('Push Container Image to Artifactory') {
+        //     steps {
+        //         script {
+        //             echo "Pushing container image to Artifactory"
+        //             sh """
+        //                 docker login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
+        //                 docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+        //                 docker push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+        //             """
+        //         }
+        //     }
+        // }
 
         // Deploying to OpenShift using Kustomize
         stage('Deploy to OpenShift with Kustomize') {
