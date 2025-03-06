@@ -13,4 +13,3 @@
 
 resources:
   - deployment-patch.yaml
-  - service.yaml
