@@ -14,6 +14,7 @@ pipeline {
 
         // Artifactory Configuration (We will add new one)
         ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
+        TOKEN = credentials('octoken')
 
         // // Security Scanning
         // //QUALYS_API_KEY = credentials('qualys-api-key')
@@ -151,13 +152,13 @@ pipeline {
                     echo "Deploying container image to OpenShift using Kustomize"
                     sh """
                         # Login to OpenShift
-                        oc login ${OPENSHIFT_SERVER} --kubeconfig ${KUBECONFIG}
+                        oc login --token ${TOKEN} ${OPENSHIFT_SERVER}
                         
                         # Set OpenShift project
                         oc project ${OPENSHIFT_PROJECT}
                         
                         # Apply Kustomize overlay to deploy to OpenShift
-                        kubectl apply -k ${KUSTOMIZE_PATH}
+                        oc apply -k ${KUSTOMIZE_PATH}
                     """
                 }
             }
