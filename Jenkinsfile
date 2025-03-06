@@ -13,7 +13,7 @@ pipeline {
         SONARQUBE_URL = 'http://your-sonarqube-server-url'  
 
         // Artifactory Configuration (We will add new one)
-        // ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
+        ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
 
         // // Security Scanning
         // //QUALYS_API_KEY = credentials('qualys-api-key')
@@ -30,11 +30,11 @@ pipeline {
         // SOAPUI_TEST_URL = 'http://soapui.example.com'
         // LOADRUNNER_URL = 'http://loadrunner.example.com'
 
-        // // OpenShift Configuration
-        // OPENSHIFT_PROJECT = 'openshift-project'
-        // OPENSHIFT_SERVER = 'https://openshift.carbon.com:6443'
-        // KUBECONFIG = '~/.kube/config'  
-        // KUSTOMIZE_PATH = 'k8s/overlays/openshift' 
+        // OpenShift Configuration
+        OPENSHIFT_PROJECT = 'dedicated-admin'
+        OPENSHIFT_SERVER = 'https://api.c1d4t8z6e7h8o7v.bfk4.p1.openshiftapps.com:6443'
+        KUBECONFIG = '~/.kube/config'  
+        KUSTOMIZE_PATH = 'k8s/overlays/openshift' 
 
         // Maven Properties for Version and Timestamp
         MAVEN_VERSION = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true).trim()
