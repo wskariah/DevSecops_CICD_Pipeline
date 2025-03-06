@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world-app
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: hello-world-app
+          image: "nexus-repository/app-name:openshift"
