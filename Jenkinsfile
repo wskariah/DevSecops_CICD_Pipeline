@@ -139,11 +139,13 @@ pipeline {
             steps {
                 script {
                     echo "Pushing container image to Artifactory"
-                    sh """
-                        docker login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
-                        docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-                        docker push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-                    """
+                    withCredentials([usernamePassword(credentialsId: 'artifactory-creds', usernameVariable: 'ARTIFACTORY_USERNAME', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
+                        sh """
+                            echo \$ARTIFACTORY_PASSWORD | docker login ${ARTIFACTORY_REPO} -u \$ARTIFACTORY_USERNAME --password-stdin
+                            docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                            docker push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                        """
+                    }
                 }
             }
         }
