@@ -13,7 +13,9 @@ pipeline {
         SONARQUBE_URL = 'http://54.80.16.163:9000'  
 
         // Artifactory Configuration (We will add new one)
-        ARTIFACTORY_REPO = 'https://artifactory.example.com/api/docker/repo'
+        ARTIFACTORY_REPO = 'http://54.80.16.163:8081/repository/t3a-carbo-repo1/'
+        ARTIFACTORY_USERNAME = 'jenkins'
+        ARTIFACTORY_PASSWORD = credentials('jenkins-nexus')
         TOKEN = credentials('octoken')
 
         // // Security Scanning
@@ -131,19 +133,19 @@ pipeline {
         //     }
         // }
 
-        // // Push container image to Artifactory (or Nexus)
-        // stage('Push Container Image to Artifactory') {
-        //     steps {
-        //         script {
-        //             echo "Pushing container image to Artifactory"
-        //             sh """
-        //                 docker login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
-        //                 docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-        //                 docker push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-        //             """
-        //         }
-        //     }
-        // }
+        // Push container image to Artifactory (or Nexus)
+        stage('Push Container Image to Artifactory') {
+            steps {
+                script {
+                    echo "Pushing container image to Artifactory"
+                    sh """
+                        docker login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
+                        docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                        docker push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                    """
+                }
+            }
+        }
 
         // Deploying to OpenShift using Kustomize
         stage('Deploy to OpenShift with Kustomize') {
