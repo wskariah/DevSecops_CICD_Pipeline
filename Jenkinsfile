@@ -134,13 +134,13 @@ pipeline {
         // }
 
         // Push container image to Artifactory (or Nexus)
+        //       docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
         stage('Push Container Image to Artifactory') {
             steps {
                 script {
                     echo "Pushing container image to Artifactory"
                     sh """
                         docker login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
-                        docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
                         docker push ${ARTIFACTORY_REPO}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
                     """
                 }
