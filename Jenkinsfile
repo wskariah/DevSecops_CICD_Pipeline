@@ -15,7 +15,7 @@ pipeline {
         // Artifactory Configuration (We will add new one)
         ARTIFACTORY_USERNAME = 'jenkins'
         ARTIFACTORY_PASSWORD = credentials('jenkins-nexus')
-        ARTIFACTORY_REPO = 'http://54.80.16.163:8081/repository/carbon-docker-hosted/'
+        ARTIFACTORY_REPO = 'http://54.80.16.163:8082'
 
 
         TOKEN = credentials('octoken')
@@ -144,7 +144,7 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'ARTIFACTORY_USERNAME', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
                         sh """
                             echo \$ARTIFACTORY_PASSWORD | docker login ${ARTIFACTORY_REPO} -u \$ARTIFACTORY_USERNAME --password-stdin
-                            docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                            docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} \${ARTIFACTORY_REPO}/repository/carbon-docker-hosted/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
                             docker push ${ARTIFACTORY_REPO}${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
                         """
                     }
