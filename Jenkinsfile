@@ -145,7 +145,7 @@ pipeline {
                         sh """
                             echo \$ARTIFACTORY_PASSWORD | docker login ${ARTIFACTORY_REPO} -u \$ARTIFACTORY_USERNAME --password-stdin
                             docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} \${ARTIFACTORY_REPO}/repository/carbon-docker-hosted/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-                            docker push ${ARTIFACTORY_REPO}${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                            docker push ${ARTIFACTORY_REPO}/repository/carbon-docker-hosted/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
                         """
                     }
                 }
