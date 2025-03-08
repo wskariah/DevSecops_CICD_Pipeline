@@ -15,7 +15,7 @@ pipeline {
         // Artifactory Configuration (We will add new one)
         ARTIFACTORY_USERNAME = 'jenkins'
         ARTIFACTORY_PASSWORD = credentials('jenkins-nexus')
-        ARTIFACTORY_REPO = 'http://54.80.16.163:8082'
+        ARTIFACTORY_REPO = 'http://54.80.16.163:8081'
 
 
         TOKEN = credentials('octoken')
