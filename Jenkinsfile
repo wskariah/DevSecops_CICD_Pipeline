@@ -13,9 +13,10 @@ pipeline {
         SONARQUBE_URL = 'http://54.80.16.163:9000'  
 
         // Artifactory Configuration (We will add new one)
-        ARTIFACTORY_REPO = 'https://54.80.16.163:8081/repository/carbon-docker-hosted/'
         ARTIFACTORY_USERNAME = 'jenkins'
         ARTIFACTORY_PASSWORD = credentials('jenkins-nexus')
+        ARTIFACTORY_REPO = 'http://54.80.16.163:8081/repository/carbon-docker-hosted/'
+
 
         TOKEN = credentials('octoken')
 
