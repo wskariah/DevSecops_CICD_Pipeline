@@ -163,17 +163,26 @@ pipeline {
             steps {
                 script {
                     echo "Deploying container image to OpenShift using Kustomize"
-                    sh """
-                        # Login to OpenShift
-                        oc login --token ${TOKEN} ${OPENSHIFT_SERVER}
-                        
-                        # Set OpenShift project
-                        oc project ${OPENSHIFT_PROJECT}
-                        
-                        # Apply Kustomize overlay to deploy to OpenShift
-                        set -e  # This ensures any command failure causes the script to exit
-                        oc apply -k ${KUSTOMIZE_PATH}
-                    """
+                    withCredentials([string(credentialsId: 'octoken', variable: 'OC_TOKEN')]) {
+                        sh '''
+                            # Login to OpenShift
+                            set +x
+                            oc login --token ${OC_TOKEN} ${OPENSHIFT_SERVER}
+                            set -x
+                            
+                            # Set OpenShift project
+                            oc project ${OPENSHIFT_PROJECT}
+                            
+                            # First validate with dry-run to catch any Gatekeeper violations
+                            echo "Validating deployment against admission policies..."
+                            set -e  # This ensures any command failure causes the script to exit
+                            oc apply -k ${KUSTOMIZE_PATH} --dry-run=server
+                            
+                            # If validation passes, proceed with actual deployment
+                            echo "Validation successful, proceeding with deployment..."
+                            oc apply -k ${KUSTOMIZE_PATH}
+                        '''
+                    }
                 }
             }
         }
