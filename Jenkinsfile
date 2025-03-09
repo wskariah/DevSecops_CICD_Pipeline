@@ -171,6 +171,7 @@ pipeline {
                         oc project ${OPENSHIFT_PROJECT}
                         
                         # Apply Kustomize overlay to deploy to OpenShift
+                        set -e  # This ensures any command failure causes the script to exit
                         oc apply -k ${KUSTOMIZE_PATH}
                     """
                 }
