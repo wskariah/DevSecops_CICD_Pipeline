@@ -13,9 +13,12 @@ pipeline {
         SONARQUBE_URL = 'http://54.80.16.163:9000'  
 
         // Artifactory Configuration (We will add new one)
-        ARTIFACTORY_USERNAME = 'jenkins'
-        ARTIFACTORY_PASSWORD = credentials('jenkins-nexus')
-        ARTIFACTORY_REPO = 'http://54.80.16.163:8081'
+        ARTIFACTORY_USERNAME = 'admin'
+        
+        // NEXUS_CREDS = credentials('jenkins-nexus') // Only use this if not using withCredentials
+        ARTIFACTORY_URL = 'http://54.80.16.163:8086'
+        ARTIFACTORY_REPO = '54.80.16.163:8086'
+        REPOSITORY_PATH = 'repository/helloworld'
 
 
         TOKEN = credentials('octoken')
@@ -141,12 +144,15 @@ pipeline {
             steps {
                 script {
                     echo "Pushing container image to Artifactory"
-                    withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'ARTIFACTORY_USERNAME', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {
-                        sh """
-                            echo \$ARTIFACTORY_PASSWORD | docker login ${ARTIFACTORY_REPO} -u \$ARTIFACTORY_USERNAME --password-stdin
-                            docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} \${ARTIFACTORY_REPO}/repository/carbon-docker-hosted/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-                            docker push ${ARTIFACTORY_REPO}/repository/carbon-docker-hosted/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-                        """
+                    withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
+                        sh '''
+                            set +x
+                            echo $NEXUS_PASSWORD | docker login http://54.80.16.163:8086/repository/helloworld/ -u $NEXUS_USER --password-stdin
+                            set -x
+                            
+                            docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                            docker push ${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                        '''
                     }
                 }
             }
