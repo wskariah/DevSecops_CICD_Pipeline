@@ -36,7 +36,7 @@ pipeline {
         // LOADRUNNER_URL = 'http://loadrunner.example.com'
 
         // OpenShift Configuration
-        OPENSHIFT_PROJECT = 'dedicated-admin2'
+        OPENSHIFT_PROJECT = 'dedicated-admin'
         TOKEN = credentials('octoken')
         OPENSHIFT_SERVER = 'https://api.c1d4t8z6e7h8o7v.bfk4.p1.openshiftapps.com:6443'
         KUBECONFIG = '~/.kube/config'  
