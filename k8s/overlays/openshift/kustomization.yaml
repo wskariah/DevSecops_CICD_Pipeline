@@ -9,4 +9,4 @@ patches:
 labels:
 - includeSelectors: true
   pairs:
-    project: t3aCarbon-PaC
+    pizza: t3aCarbon-PaC
