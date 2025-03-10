@@ -20,9 +20,6 @@ pipeline {
         ARTIFACTORY_REPO = '54.80.16.163:8086'
         REPOSITORY_PATH = 'repository/helloworld'
 
-
-        TOKEN = credentials('octoken')
-
         // // Security Scanning
         // //QUALYS_API_KEY = credentials('qualys-api-key')
 
@@ -39,7 +36,8 @@ pipeline {
         // LOADRUNNER_URL = 'http://loadrunner.example.com'
 
         // OpenShift Configuration
-        OPENSHIFT_PROJECT = 'dedicated-admin'
+        OPENSHIFT_PROJECT = 'dedicated-admin2'
+        TOKEN = credentials('octoken')
         OPENSHIFT_SERVER = 'https://api.c1d4t8z6e7h8o7v.bfk4.p1.openshiftapps.com:6443'
         KUBECONFIG = '~/.kube/config'  
         KUSTOMIZE_PATH = 'k8s/overlays/openshift' 
