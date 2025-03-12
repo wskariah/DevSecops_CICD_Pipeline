@@ -124,7 +124,7 @@ pipeline {
             }
         }
 
-        stage('Deploy with Kustomize (OpenShift)') {
+        stage('Annotate Manifests with Kustomize (OpenShift)') {
             steps {
                 script {
                     // Read the SonarQube status from the environment file
@@ -132,6 +132,12 @@ pipeline {
 
                     // Navigate to the overlays/openshift directory
                     dir('k8s/overlays/openshift') {
+                // Update the image tag in kustomization.yaml
+                        sh """
+                            echo "Updating image tag in Kustomize deployment"
+                            kustomize edit set image ${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}=${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                        """
+
                         // Add annotations to the Kustomize deployment
                         sh """
                             echo "Adding SonarQube status to Kustomize deployment"
