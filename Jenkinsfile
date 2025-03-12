@@ -12,25 +12,23 @@ pipeline {
         SONAR_TOKEN = credentials('sonarqube-token') 
         SONARQUBE_URL = 'http://54.80.16.163:9000'  
 
-        // Artifactory Configuration (We will add new one)
+        // Artifactory Configuration
         ARTIFACTORY_USERNAME = 'admin'
-        
-        // NEXUS_CREDS = credentials('jenkins-nexus') // Only use this if not using withCredentials
         ARTIFACTORY_URL = 'http://54.80.16.163:8086'
         ARTIFACTORY_REPO = '54.80.16.163:8086'
         REPOSITORY_PATH = 'repository/helloworld'
 
-        // // Security Scanning
-        // //QUALYS_API_KEY = credentials('qualys-api-key')
+        // Security Scanning
+        // QUALYS_API_KEY = credentials('qualys-api-key')
 
-        // // ServiceNow for Change Management
-        // //SERVICE_NOW_TOKEN = credentials('servicenow-token')
+        // ServiceNow for Change Management
+        // SERVICE_NOW_TOKEN = credentials('servicenow-token')
 
-        // // URLs for Different Environments- THIS NEEDS TO BE IDENTIFIED
+        // URLs for Different Environments- THIS NEEDS TO BE IDENTIFIED
         // ECP_DEV_URL = 'https://ecp-dev.example.com'
         // ECP_PROD_URL = 'https://ecp-prod.example.com'
 
-        // // Testing URLs and Tools
+        // Testing URLs and Tools
         // SELENIUM_GRID_URL = 'http://selenium-grid.example.com'
         // SOAPUI_TEST_URL = 'http://soapui.example.com'
         // LOADRUNNER_URL = 'http://loadrunner.example.com'
@@ -62,7 +60,6 @@ pipeline {
             }
         }
 
-        // Building the container image
         stage('Build Container Image') {
             steps {
                 script {
@@ -74,7 +71,7 @@ pipeline {
             }
         }
 
-        // // Jacoco Code Coverage
+        // Jacoco Code Coverage
         // stage('Jacoco Code Coverage') {
         //     steps {
         //         script {
@@ -87,7 +84,7 @@ pipeline {
         //     }
         // }
 
-        // // Publish Jacoco Report
+        // Publish Jacoco Report
         // stage('Publish Jacoco Report') {
         //     steps {
         //         script {
@@ -102,7 +99,6 @@ pipeline {
         //     }
         // }
 
-        // The SonarQube Analysis
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -124,31 +120,7 @@ pipeline {
             }
         }
 
-        stage('Annotate Manifests with Kustomize (OpenShift)') {
-            steps {
-                script {
-                    // Read the SonarQube status from the environment file
-                    def sonarStatus = readFile('env.properties').trim()
-
-                    // Navigate to the overlays/openshift directory
-                    dir('k8s/overlays/openshift') {
-                // Update the image tag in kustomization.yaml
-                        sh """
-                            echo "Updating image tag in Kustomize deployment"
-                            kustomize edit set image ${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}=${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-                        """
-
-                        // Add annotations to the Kustomize deployment
-                        sh """
-                            echo "Adding SonarQube status to Kustomize deployment"
-                            kustomize edit add annotation --force sonarqube-status:${sonarStatus}
-                        """
-                    }
-                }
-            }
-        }
-
-        // // DAST Qualys Security Scan
+        // DAST Qualys Security Scan
         // stage('Qualys Static Container Security Scan') {
         //     steps {
         //         script {
@@ -158,7 +130,7 @@ pipeline {
         //     }
         // }
 
-        // // Testing with Selenium 
+        // Testing with Selenium 
         // stage('Run Selenium Tests') {
         //     steps {
         //         script {
@@ -170,8 +142,6 @@ pipeline {
         //     }
         // }
 
-        // Push container image to Artifactory (or Nexus)
-        //docker login ${ARTIFACTORY_REPO} -u ${ARTIFACTORY_USERNAME} -p ${ARTIFACTORY_PASSWORD}
         stage('Push Container Image to Artifactory') {
             steps {
                 script {
@@ -190,7 +160,33 @@ pipeline {
             }
         }
 
-        // Deploying to OpenShift using Kustomize
+        stage('Update Image And Annotate Manifests with Kustomize (OpenShift)') {
+            steps {
+                script {
+                    // Read the SonarQube status from the environment file
+                    def sonarStatus = "failed"  // Default value
+                    if (fileExists('env.properties')) {
+                        sonarStatus = readFile('env.properties').trim()
+                    }
+
+                    // Navigate to the overlays/openshift directory
+                    dir("${KUSTOMIZE_PATH}") {
+                        // Update the image tag in kustomization.yaml
+                        sh """
+                            echo "Updating image tag in Kustomize deployment"
+                            kustomize edit set image ${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}=${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                        """
+
+                        // Add annotations to the Kustomize deployment
+                        sh """
+                            echo "Adding SonarQube status to Kustomize deployment"
+                            kustomize edit add annotation --force sonarqube-status:${sonarStatus}
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Deploy to OpenShift with Kustomize') {
             steps {
                 script {
@@ -208,7 +204,7 @@ pipeline {
                             # First validate with dry-run to catch any Gatekeeper violations
                             echo "Validating deployment against admission policies..."
                             set -e  # This ensures any command failure causes the script to exit
-                            oc apply -k ${KUSTOMIZE_PATH} --dry-run=server
+                            oc apply -k ${KUSTOMIZE_PATH} --dry-run=server -o yaml
                             
                             # If validation passes, proceed with actual deployment
                             echo "Validation successful, proceeding with deployment..."
