@@ -108,8 +108,36 @@ pipeline {
                 script {
                     echo "Running SonarQube analysis"
                     sh '''
-                        mvn sonar:sonar -Dsonar.projectKey=${IMAGE_NAME} -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN}
+                        # Run SonarQube analysis and capture the output
+                        output=$(mvn sonar:sonar -Dsonar.projectKey=${IMAGE_NAME} -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN} 2>&1)
+
+                        # Check if the analysis was successful
+                        if echo "$output" | grep -q "ANALYSIS SUCCESSFUL"; then
+                            echo "SonarQube analysis successful"
+                            echo "SONAR_STATUS=success" >> env.properties
+                        else
+                            echo "SonarQube analysis failed"
+                            echo "SONAR_STATUS=failed" >> env.properties
+                        fi
                     '''
+                }
+            }
+        }
+
+        stage('Deploy with Kustomize (OpenShift)') {
+            steps {
+                script {
+                    // Read the SonarQube status from the environment file
+                    def sonarStatus = readFile('env.properties').trim()
+
+                    // Navigate to the overlays/openshift directory
+                    dir('k8s/overlays/openshift') {
+                        // Add annotations to the Kustomize deployment
+                        sh """
+                            echo "Adding SonarQube status to Kustomize deployment"
+                            kustomize edit add annotation sonarqube-status:${sonarStatus} 
+                        """
+                    }
                 }
             }
         }

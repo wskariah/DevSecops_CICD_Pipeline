@@ -10,3 +10,7 @@ labels:
 - includeSelectors: true
   pairs:
     project: t3aCarbon-PaC
+
+# Add common annotations
+commonAnnotations:
+  sonarqube-status: "success"  # This will be overwritten by the pipeline
