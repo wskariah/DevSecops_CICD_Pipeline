@@ -3,8 +3,13 @@ pipeline {
 
     environment {
         // Environment Variables
+
+        // Maven Properties for Version and Timestamp
+        MAVEN_VERSION = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true).trim()
+        BUILD_TIMESTAMP = sh(script: 'date +%Y-%m-%d_%H-%M-%S', returnStdout: true).trim()
+
         IMAGE_NAME = 'hello-world-app' 
-        IMAGE_TAG = 'latest'
+        IMAGE_TAG = "${MAVEN_VERSION}-${BUILD_TIMESTAMP}"  // Combine version and timestamp
         CONTAINER_REGISTRY = 'docker.io'
 
         // SonarQube Configuration
@@ -13,9 +18,7 @@ pipeline {
         SONARQUBE_URL = 'http://54.80.16.163:9000'  
 
         // Artifactory Configuration
-        ARTIFACTORY_USERNAME = 'admin'
         ARTIFACTORY_URL = 'http://54.80.16.163:8086'
-        ARTIFACTORY_REPO = '54.80.16.163:8086'
         REPOSITORY_PATH = 'repository/helloworld'
 
         // Security Scanning
@@ -40,9 +43,7 @@ pipeline {
         KUBECONFIG = '~/.kube/config'  
         KUSTOMIZE_PATH = 'k8s/overlays/openshift' 
 
-        // Maven Properties for Version and Timestamp
-        MAVEN_VERSION = sh(script: 'mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true).trim()
-        BUILD_TIMESTAMP = sh(script: 'date +%Y-%m-%d_%H-%M-%S', returnStdout: true).trim()
+
     }
 
     stages {
@@ -63,9 +64,9 @@ pipeline {
         stage('Build Container Image') {
             steps {
                 script {
-                    echo "Building container image ${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}"
+                    echo "Building and pushing container image ${IMAGE_NAME}:${IMAGE_TAG}"
                     sh """
-                        docker build -t ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} .
+                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
                     """
                 }
             }
@@ -149,11 +150,14 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'jenkins-nexus', usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASSWORD')]) {
                         sh '''
                             set +x
-                            echo $NEXUS_PASSWORD | docker login http://54.80.16.163:8086/repository/helloworld/ -u $NEXUS_USER --password-stdin
+                            echo $NEXUS_PASSWORD | docker login ${ARTIFACTORY_URL}/${REPOSITORY_PATH}/ -u $NEXUS_USER --password-stdin
                             set -x
+
+                            # Tag the local image with the Artifactory path
+                            docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${ARTIFACTORY_URL}/${REPOSITORY_PATH}/${IMAGE_NAME}:${IMAGE_TAG}
                             
-                            docker tag ${CONTAINER_REGISTRY}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP} ${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
-                            docker push ${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                            # Push the Docker image to Artifactory
+                            docker push ${ARTIFACTORY_URL}/${REPOSITORY_PATH}/${IMAGE_NAME}:${IMAGE_TAG}
                         '''
                     }
                 }
@@ -174,7 +178,7 @@ pipeline {
                         // Update the image tag in kustomization.yaml
                         sh """
                             echo "Updating image tag in Kustomize deployment"
-                            kustomize edit set image ${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}=${ARTIFACTORY_REPO}/${REPOSITORY_PATH}/${IMAGE_NAME}:${MAVEN_VERSION}-${BUILD_TIMESTAMP}
+                            kustomize edit set image ${ARTIFACTORY_URL}/${REPOSITORY_PATH}/${IMAGE_NAME}=${ARTIFACTORY_URL}/${REPOSITORY_PATH}/${IMAGE_NAME}:${IMAGE_TAG}
                         """
 
                         // Add annotations to the Kustomize deployment

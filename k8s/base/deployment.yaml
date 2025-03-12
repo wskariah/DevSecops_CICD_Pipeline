@@ -16,6 +16,6 @@ spec:
       serviceAccountName: t3apac  # Use the custom ServiceAccount
       containers:
         - name: hello-world-app
-          image: "nexus-repository/app-name:latest"
+          image: nexus-repository/app-name
           ports:
             - containerPort: 8080
