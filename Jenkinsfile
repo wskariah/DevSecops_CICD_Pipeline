@@ -18,7 +18,7 @@ pipeline {
         SONARQUBE_URL = 'http://54.80.16.163:9000'  
 
         // Artifactory Configuration
-        ARTIFACTORY_URL = 'http://54.80.16.163:8086'
+        ARTIFACTORY_URL = '54.80.16.163:8086'
         REPOSITORY_PATH = 'repository/helloworld'
 
         // Security Scanning
