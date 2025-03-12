@@ -13,4 +13,4 @@ labels:
 
 # Add common annotations
 commonAnnotations:
-  sonarqube-status: "success"  # This will be overwritten by the pipeline
+  sonarqube-status: failed
