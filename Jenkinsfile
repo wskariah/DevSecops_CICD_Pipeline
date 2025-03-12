@@ -135,7 +135,7 @@ pipeline {
                         // Add annotations to the Kustomize deployment
                         sh """
                             echo "Adding SonarQube status to Kustomize deployment"
-                            kustomize edit --force add annotation sonarqube-status:${sonarStatus} 
+                            kustomize edit add annotation sonarqube-status:${sonarStatus} 
                         """
                     }
                 }
