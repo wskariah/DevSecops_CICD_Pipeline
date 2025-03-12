@@ -13,6 +13,7 @@ spec:
       labels:
         app: hello-world-app
     spec:
+      serviceAccountName: t3apac  # Use the custom ServiceAccount
       containers:
         - name: hello-world-app
           image: "nexus-repository/app-name:latest"
