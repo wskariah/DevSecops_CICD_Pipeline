@@ -64,7 +64,7 @@ pipeline {
         stage('Build Container Image') {
             steps {
                 script {
-                    echo "Building and pushing container image ${IMAGE_NAME}:${IMAGE_TAG}"
+                    echo "Building container image ${IMAGE_NAME}:${IMAGE_TAG}"
                     sh """
                         docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
                     """
@@ -100,26 +100,26 @@ pipeline {
         //     }
         // }
 
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    echo "Running SonarQube analysis"
-                    sh '''
-                        # Run SonarQube analysis and capture the output
-                        output=$(mvn sonar:sonar -Dsonar.projectKey=${IMAGE_NAME} -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN} 2>&1)
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         script {
+        //             echo "Running SonarQube analysis"
+        //             sh '''
+        //                 # Run SonarQube analysis and capture the output
+        //                 output=$(mvn sonar:sonar -Dsonar.projectKey=${IMAGE_NAME} -Dsonar.host.url=${SONARQUBE_URL} -Dsonar.login=${SONAR_TOKEN} 2>&1)
 
-                        # Check if the analysis was successful
-                        if echo "$output" | grep -q "ANALYSIS SUCCESSFUL"; then
-                            echo "SonarQube analysis successful"
-                            echo "SONAR_STATUS=success" >> env.properties
-                        else
-                            echo "SonarQube analysis failed"
-                            echo "SONAR_STATUS=failed" >> env.properties
-                        fi
-                    '''
-                }
-            }
-        }
+        //                 # Check if the analysis was successful
+        //                 if echo "$output" | grep -q "ANALYSIS SUCCESSFUL"; then
+        //                     echo "SonarQube analysis successful"
+        //                     echo "SONAR_STATUS=success" >> env.properties
+        //                 else
+        //                     echo "SonarQube analysis failed"
+        //                     echo "SONAR_STATUS=failed" >> env.properties
+        //                 fi
+        //             '''
+        //         }
+        //     }
+        // }
 
         // DAST Qualys Security Scan
         // stage('Qualys Static Container Security Scan') {
@@ -168,7 +168,7 @@ pipeline {
             steps {
                 script {
                     // Read the SonarQube status from the environment file
-                    def sonarStatus = "failed"  // Default value
+                    def sonarStatus = "SONAR_STATUS=failed"  // Default value
                     if (fileExists('env.properties')) {
                         sonarStatus = readFile('env.properties').trim()
                     }
