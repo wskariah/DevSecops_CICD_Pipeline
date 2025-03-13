@@ -106,7 +106,7 @@ pipeline {
                     echo "Running SonarQube analysis"
                     try {
                         // Run SonarQube analysis and capture the output
-                        def sonarOutput = sh(script: """
+                        def output = sh(script: """
                             mvn sonar:sonar \
                                 -Dsonar.projectKey=${IMAGE_NAME} \
                                 -Dsonar.host.url=${SONARQUBE_URL} \
@@ -114,18 +114,20 @@ pipeline {
                         """, returnStdout: true).trim()
 
                         // Check if the analysis was successful
-                        if (sonarOutput.contains("ANALYSIS SUCCESSFUL")) {
+                        if (output.contains("ANALYSIS SUCCESSFUL")) {
                             echo "SonarQube analysis successful"
-                            writeFile file: 'env.properties', text: 'SONAR_STATUS=success'
+                            writeFile file: 'env.properties', text: 'success'
                         } else {
-                            echo "SonarQube analysis failed"
-                            writeFile file: 'env.properties', text: 'SONAR_STATUS=failed'
-                            error("SonarQube analysis failed") // Fail the pipeline if analysis fails
+                            // If the output does not contain "ANALYSIS SUCCESSFUL", fail the pipeline
+                            echo "SonarQube analysis failed (output does not indicate success)"
+                            writeFile file: 'env.properties', text: 'failed'
+                            error("SonarQube analysis failed") // Fail the pipeline
                         }
                     } catch (Exception e) {
+                        // Catch any exceptions (e.g., command failure) and set status to failed
                         echo "SonarQube analysis failed with error: ${e}"
-                        writeFile file: 'env.properties', text: 'SONAR_STATUS=failed'
-                        error("SonarQube analysis failed") // Fail the pipeline if analysis fails
+                        writeFile file: 'env.properties', text: 'failed'
+                        error("SonarQube analysis failed") // Fail the pipeline
                     }
                 }
             }
@@ -177,12 +179,11 @@ pipeline {
         stage('Update Image And Annotate Manifests with Kustomize (OpenShift)') {
             steps {
                 script {
-                    // Read the SonarQube status from the environment file
-                    def sonarStatus = "failed"  // Default value
+                    // Read the sonarqubeStatus  status from the environment file
+                    def sonarqubeStatus  = "failed"  // Default value
                     if (fileExists('env.properties')) {
-                        sonarStatus = readFile('env.properties').trim()
-                        // Extract the status value (e.g., "success" or "failed")
-                        sonarStatus = sonarStatus.replace("SONAR_STATUS=", "")
+                        sonarqubeStatus  = readFile('env.properties').trim()
+
                     }
 
                     // Navigate to the overlays/openshift directory
@@ -196,7 +197,7 @@ pipeline {
                         // Add annotations to the Kustomize deployment
                         sh """
                             echo "Adding SonarQube status to Kustomize deployment"
-                            kustomize edit add annotation --force sonarqube-status:${sonarStatus}
+                            kustomize edit add annotation --force sonarqube-status:${sonarqubeStatus}
                         """
                     }
                 }
