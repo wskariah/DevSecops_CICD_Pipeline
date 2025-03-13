@@ -100,38 +100,36 @@ pipeline {
         //     }
         // }
 
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         script {
-        //             echo "Running SonarQube analysis"
-        //             try {
-        //                 // Run SonarQube analysis and capture the output
-        //                 def output = sh(script: """
-        //                     mvn sonar:sonar \
-        //                         -Dsonar.projectKey=${IMAGE_NAME} \
-        //                         -Dsonar.host.url=${SONARQUBE_URL} \
-        //                         -Dsonar.login=${SONAR_TOKEN}
-        //                 """, returnStdout: true).trim()
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    echo "Running SonarQube analysis"
+                    try {
+                        // Run SonarQube analysis and capture the output
+                        def output = sh(script: """
+                            mvn sonar:sonar \
+                                -Dsonar.projectKey=${IMAGE_NAME} \
+                                -Dsonar.host.url=${SONARQUBE_URL} \
+                                -Dsonar.login=${SONAR_TOKEN}
+                        """, returnStdout: true).trim()
 
-        //                 // Check if the analysis was successful
-        //                 if (output.contains("ANALYSIS SUCCESSFUL")) {
-        //                     echo "SonarQube analysis successful"
-        //                     writeFile file: 'env.properties', text: 'success'
-        //                 } else {
-        //                     // If the output does not contain "ANALYSIS SUCCESSFUL", fail the pipeline
-        //                     echo "SonarQube analysis failed (output does not indicate success)"
-        //                     writeFile file: 'env.properties', text: 'failed'
-        //                     error("SonarQube analysis failed") // Fail the pipeline
-        //                 }
-        //             } catch (Exception e) {
-        //                 // Catch any exceptions (e.g., command failure) and set status to failed
-        //                 echo "SonarQube analysis failed with error: ${e}"
-        //                 writeFile file: 'env.properties', text: 'failed'
-        //                 error("SonarQube analysis failed") // Fail the pipeline
-        //             }
-        //         }
-        //     }
-        // }
+                        // Check if the analysis was successful
+                        if (output.contains("ANALYSIS SUCCESSFUL")) {
+                            echo "SonarQube analysis successful"
+                            env.SONARQUBE_STATUS = "success"  // Set environment variable
+                        } else {
+                            echo "SonarQube analysis failed"
+                            error("SonarQube analysis failed")  // Fail the pipeline
+                        }
+                    } catch (Exception e) {
+                        // Catch any exceptions (e.g., command failure) and set status to failed
+                        echo "SonarQube analysis failed with error: ${e}"
+                        writeFile file: 'env.properties', text: 'failed'
+                        error("SonarQube analysis failed") // Fail the pipeline
+                    }
+                }
+            }
+        }
 
         // DAST Qualys Security Scan
         // stage('Qualys Static Container Security Scan') {
@@ -179,14 +177,8 @@ pipeline {
         stage('Update Image And Annotate Manifests with Kustomize (OpenShift)') {
             steps {
                 script {
-                    // Read the SonarQube Scan status from the environment file
-                    def sonarqubeStatus  = "failed"  // Default value
-                    echo "**************"
-                    echo " Debug: SonarQube Scan Status is ${sonarqubeStatus}"
-                    echo "**************"
-                    if (fileExists('env.properties')) {
-                        sonarqubeStatus  = readFile('env.properties').trim()
-                    }
+                    // Set the SonarQube Scan status from the environment variable
+                    def sonarqubeStatus = env.SONARQUBE_STATUS ?: "failed"  // Default value if not set
                     echo "**************"
                     echo " Debug: SonarQube Scan Status is ${sonarqubeStatus}"
                     echo "**************"
