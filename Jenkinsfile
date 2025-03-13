@@ -179,7 +179,7 @@ pipeline {
         stage('Update Image And Annotate Manifests with Kustomize (OpenShift)') {
             steps {
                 script {
-                    // Read the sonarqubeStatus  status from the environment file
+                    // Read the SonarQube Scan status from the environment file
                     def sonarqubeStatus  = "failed"  // Default value
                     if (fileExists('env.properties')) {
                         sonarqubeStatus  = readFile('env.properties').trim()
@@ -196,8 +196,8 @@ pipeline {
 
                         // Add annotations to the Kustomize deployment
                         sh """
-                            echo "Adding SonarQube status to Kustomize deployment"
-                            kustomize edit add annotation --force sonarqube-status:${sonarqubeStatus}
+                            echo "Adding SonarQube Scan status to Kustomize deployment"
+                            kustomize edit add annotation --force sonarqube-scan:${sonarqubeStatus}
                         """
                     }
                 }
