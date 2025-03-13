@@ -11,10 +11,6 @@ labels:
   pairs:
     project: t3aCarbon-PaC
 
-# Add common annotations
-commonAnnotations:
-  sonarqube-status: failed
-
 # Customize images (optional, if not using patches)
 images:
   - name: nexus-repository/app-name
