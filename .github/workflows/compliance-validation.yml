@@ -1,5 +1,4 @@
-name: Validate 508 Compliance in Checklist
-
+name: Validate Compliance Checklist
 on:
   push:
     paths:
@@ -9,21 +8,24 @@ on:
       - '.github/compliance_checklist.md'
 
 jobs:
-  validate-compliance:
+  validate-checklist:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Validate 508 Compliance Item
-      id: check-508
-      run: |
-        FILE_PATH=".github/compliance_checklist.md"
-        if grep -q "508 Deployment Recommendation Email or Self-certification of no accessibility Impact" "$FILE_PATH"; then
-          echo "✅ 508 compliance item found in checklist"
-          echo "result=pass" >> $GITHUB_OUTPUT
-        else
-          echo "::error file=$FILE_PATH::508 compliance item missing from checklist"
-          echo "result=fail" >> $GITHUB_OUTPUT
-          exit 1
-        fi
+      - name: Validate Checklist Items
+        id: validate
+        run: |
+          FILE_PATH=".github/compliance_checklist.md"
+          FAILED=0
+
+          # Define required items with validation patterns
+          declare -A COMPLIANCE_ITEMS=(
+            ["508 Deployment"]="\*\*508 Deployment Recommendation Email\*\* or Self-certification.*\n\* Date Completed:.*\n\* URL:"
+            ["SSN Retention"]="\*\*Social Security Number Retention Justification\*\*.*\n\* Date Completed:.*\n\* URL:"
+            ["Privacy Assessment"]="\*\*Privacy Threshold Assessment \(PTA\).*\n\* Date Completed:.*\n\* URL:"
+            ["Security Scanning"]="\*\*Security Compliance Scanning\*\*.*\n\* Date Completed:.*\n\* URL:"
+            ["Security Change Mgmt"]="\*\*Security Change Management \(SecChM\)\*\*.*\n\* Date Completed:.*\n\* URL:"
+            ["ATO Validation"]="\*\*Authorization to Operate \(ATO\)\*\*.*\n\* Date Completed:.*\n\* URL:"
+            ["As-Built Architecture"]="\
