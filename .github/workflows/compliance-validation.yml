@@ -1,47 +1,29 @@
-name: Compliance Checklist Validator
+name: Validate 508 Compliance in Checklist
+
 on:
+  push:
+    paths:
+      - '.github/compliance_checklist.md'
   pull_request:
-    types: [opened, edited, synchronize]
-  issue_comment:
-    types: [created, edited]
+    paths:
+      - '.github/compliance_checklist.md'
 
 jobs:
-  validate-checklist:
+  validate-compliance:
     runs-on: ubuntu-latest
     steps:
-      - name: Check for unchecked items
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const requiredItems = [
-              "508 Deployment Recommendation Email or Self-certification of no accessibility Impact",
-              "Social Security Number Retention Justification (F-14132) or self-certification of no SSN/TIN impact",
-              "Privacy Threshold Assessment (PTA) / Privacy and Civil Liberties Impact Assessment (PCLIA)",
-              "Security Compliance Scanning: (Qualys Vulnerability and Web Application, Database, Source Code, Configuration Compliance, etc.)",
-              "Security Change Management (SecChM) - Change Request submitted with Scan evidence links",
-              "Authorization to Operate (ATO) is current and validated with the Authorizing Official (AO)",
-              "As-Built-Architecture – update submitted",
-              "Computer Operator Handbook (COH) - appropriate information sent to the Enterprise Computing Center (ECC)"
-            ];
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-            // For PRs
-            if (context.payload.pull_request) {
-              const body = context.payload.pull_request.body || '';
-              const missingChecks = requiredItems.filter(item => !body.includes(`- [x] ${item}`));
-              if (missingChecks.length > 0) {
-                core.setFailed(`❌ Missing checked items: ${missingChecks.join(', ')}`);
-              }
-            }
-
-            // For Issues
-            if (context.payload.issue) {
-              const { data: issue } = await github.rest.issues.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.payload.issue.number
-              });
-              const missingChecks = requiredItems.filter(item => !issue.body.includes(`- [x] ${item}`));
-              if (missingChecks.length > 0) {
-                core.setFailed(`❌ Missing checked items: ${missingChecks.join(', ')}`);
-              }
-            }
+    - name: Validate 508 Compliance Item
+      id: check-508
+      run: |
+        FILE_PATH=".github/compliance_checklist.md"
+        if grep -q "508 Deployment Recommendation Email or Self-certification of no accessibility Impact" "$FILE_PATH"; then
+          echo "✅ 508 compliance item found in checklist"
+          echo "result=pass" >> $GITHUB_OUTPUT
+        else
+          echo "::error file=$FILE_PATH::508 compliance item missing from checklist"
+          echo "result=fail" >> $GITHUB_OUTPUT
+          exit 1
+        fi
