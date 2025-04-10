@@ -1,7 +1,9 @@
 name: Validate Full Compliance Checklist
 on:
-  pull_request:
-    paths: ['.github/compliance_checklist.md']
+    push:
+      branches: [ "main" ]
+#   pull_request:
+#     paths: ['.github/compliance_checklist.md']
 
 jobs:
   validate:
