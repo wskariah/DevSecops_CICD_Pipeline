@@ -1,0 +1,69 @@
+name: Validate Compliance Checklist
+on:
+  push:
+    paths:
+      - '.github/compliance_validation.md'
+  pull_request:
+    paths:
+      - '.github/compliance_validation.md'
+
+jobs:
+  validate-checklist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Checklist Items
+        id: validate
+        run: |
+          FILE_PATH=".github/compliance_validation.md"
+          FAILED=0
+
+          # Define required items with validation patterns
+          declare -A COMPLIANCE_ITEMS=(
+            ["508 Deployment"]="\*\*508 Deployment Recommendation Email\*\* or Self-certification.*\n\* Date Completed:.*\n\* URL:"
+            ["SSN Retention"]="\*\*Social Security Number Retention Justification\*\*.*\n\* Date Completed:.*\n\* URL:"
+            ["Privacy Assessment"]="\*\*Privacy Threshold Assessment \(PTA\).*\n\* Date Completed:.*\n\* URL:"
+            ["Security Scanning"]="\*\*Security Compliance Scanning\*\*.*\n\* Date Completed:.*\n\* URL:"
+            ["Security Change Mgmt"]="\*\*Security Change Management \(SecChM\)\*\*.*\n\* Date Completed:.*\n\* URL:"
+            ["ATO Validation"]="\*\*Authorization to Operate \(ATO\)\*\*.*\n\* Date Completed:.*\n\* URL:"
+            ["As-Built Architecture"]="\*\*As-Built-Architecture\*\*.*\n\* Date Completed:.*\n\* URL:"
+            ["Computer Operator Handbook"]="\*\*Computer Operator Handbook \(COH\)\*\*.*\n\* Date Completed:.*\n\* URL:"
+          )
+
+          # Check each item
+          for ITEM in "${!COMPLIANCE_ITEMS[@]}"; do
+            PATTERN="${COMPLIANCE_ITEMS[$ITEM]}"
+            if ! grep -Pzq "$PATTERN" "$FILE_PATH"; then
+              echo "::error file=$FILE_PATH,title=Missing Compliance Item::Section '$ITEM' is missing or incomplete (requires Date Completed and URL)"
+              FAILED=1
+            fi
+          done
+
+          # Check for placeholder values
+          if grep -q "\[Link\]\(#\)" "$FILE_PATH" || grep -q "Date Completed: *$" "$FILE_PATH"; then
+            echo "::error file=$FILE_PATH,title=Placeholder Found::Replace all placeholder values with actual dates and URLs"
+            FAILED=1
+          fi
+
+          # Final result
+          if [ $FAILED -eq 0 ]; then
+            echo "result=pass" >> $GITHUB_OUTPUT
+            echo "✅ All compliance items validated successfully!"
+          else
+            echo "result=fail" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Comment on PR if failed
+        if: steps.validate.outputs.result == 'fail'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "⚠️ Compliance Checklist Validation Failed\n\nMissing or incomplete items detected:\n\n- All sections must include:\n  - Completed date (YYYY-MM-DD)\n  - Valid URL\n- No placeholder values allowed\n\nPlease update `.github/compliance_validation.md`"
+            })
