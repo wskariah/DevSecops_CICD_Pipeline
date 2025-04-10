@@ -2,10 +2,10 @@ name: Validate Compliance Checklist
 on:
   push:
     paths:
-      - '.github/compliance_validation.md'
+      - '.github/compliance_checklist.md'
   pull_request:
     paths:
-      - '.github/compliance_validation.md'
+      - '.github/compliance_checklist.md'
 
 jobs:
   validate-checklist:
@@ -17,7 +17,7 @@ jobs:
       - name: Validate Checklist Items
         id: validate
         run: |
-          FILE_PATH=".github/compliance_validation.md"
+          FILE_PATH=".github/compliance_checklist.md"
           FAILED=0
 
           # Define required items with validation patterns
@@ -65,5 +65,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "⚠️ Compliance Checklist Validation Failed\n\nMissing or incomplete items detected:\n\n- All sections must include:\n  - Completed date (YYYY-MM-DD)\n  - Valid URL\n- No placeholder values allowed\n\nPlease update `.github/compliance_validation.md`"
+              body: "⚠️ Compliance Checklist Validation Failed\n\nMissing or incomplete items detected:\n\n- All sections must include:\n  - Completed date (YYYY-MM-DD)\n  - Valid URL\n- No placeholder values allowed\n\nPlease update `.github/compliance_checklist.md`"
             })
