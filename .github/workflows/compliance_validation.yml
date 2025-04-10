@@ -19,11 +19,11 @@ jobs:
             ["508 Deployment"]="Date Completed:|URL:"
             ["SSN Retention"]="Date Completed:|URL:"
             ["PTA/PCLIA"]="Date Completed:|URL:"
-            ["Security Scanning"]="Qualys Report Date:|SAST Results URL:"
-            ["SecChM"]="Change Request ID:|Evidence URL:"
-            ["ATO"]="Validation Date:|AO Approval URL:"
-            ["As-Built"]="Update Date:|Documentation URL:"
-            ["COH"]="Submission Date:|ECC Confirmation URL:"
+            ["Security Scanning"]="Date Completed:|URL:"
+            ["SecChM"]="Date Completed:|URL:"
+            ["ATO"]="Date Completed:|URL:"
+            ["As-Built"]="Date Completed:|URL:"
+            ["COH"]="SDate Completed:|URL:"
           )
 
           FAILED=0
