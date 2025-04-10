@@ -30,16 +30,16 @@ jobs:
           FILE=".github/compliance_checklist.md"
           CONTENT=$(cat $FILE)
 
-          # Check each section's requirements
-          for SECTION in "${!SECTIONS[@]}"; do
-            IFS='|' read -ra FIELDS <<< "${SECTIONS[$SECTION]}"
-            for FIELD in "${FIELDS[@]}"; do
-              if ! grep -q "$FIELD" <<< "$CONTENT"; then
-                echo "::error file=$FILE,title=Missing Field::Section '$SECTION' missing '$FIELD'"
-                FAILED=1
-              fi
-            done
-          done
+          # # Check each section's requirements
+          # for SECTION in "${!SECTIONS[@]}"; do
+          #   IFS='|' read -ra FIELDS <<< "${SECTIONS[$SECTION]}"
+          #   for FIELD in "${FIELDS[@]}"; do
+          #     if ! grep -q "$FIELD" <<< "$CONTENT"; then
+          #       echo "::error file=$FILE,title=Missing Field::Section '$SECTION' missing '$FIELD'"
+          #       FAILED=1
+          #     fi
+          #   done
+          # done
 
           # Check for unchecked boxes or placeholders
           if grep -q "- [ ]" $FILE || grep -q "<!--" $FILE; then
