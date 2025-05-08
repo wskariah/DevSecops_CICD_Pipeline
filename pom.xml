@@ -78,7 +78,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version> <!-- Surefire plugin to run tests -->
+                <version>3.5.3</version> <!-- Surefire plugin to run tests -->
             </plugin>
 
             <!-- Spring Boot Maven Plugin to build and run the Spring Boot application -->
